@@ -33,7 +33,7 @@ interface loginData {
     password: string;
     email: string;
 }
-// Define the initial state
+// Define the initia l state
 const initialState: UserState = {
     data: null,
     loading: "idle",

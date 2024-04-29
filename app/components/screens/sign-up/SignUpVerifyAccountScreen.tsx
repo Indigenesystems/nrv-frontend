@@ -3,6 +3,9 @@ import Button from "../../shared/buttons/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { verifyAccount } from "@/redux/slices/userSlice";
 import { useRouter } from "next/navigation";
+import { IoIosArrowBack } from "react-icons/io";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SignUpVerifyAccount: React.FC = () => {
   const dispatch = useDispatch();
@@ -19,7 +22,7 @@ const SignUpVerifyAccount: React.FC = () => {
   ]);
   const [showWarning, setShowWarning] = useState<boolean>(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false); // New loading state
 
   useEffect(() => {
     inputRefs.current[inputNum - 1]?.focus();
@@ -33,7 +36,7 @@ const SignUpVerifyAccount: React.FC = () => {
       email: user?.data?.email,
       confirmationCode: formattedCode,
     };
-
+    setIsLoading(true);
     await dispatch(verifyAccount(payload) as any)
       .unwrap()
       .then(() => {
@@ -48,10 +51,12 @@ const SignUpVerifyAccount: React.FC = () => {
         } else if (userAccountType === "tenant") {
           router.push("/dashboard/tenant");
         }
+        setIsLoading(false); 
       })
       .catch((error: any) => {
-        alert(error);
+        toast.error(error);
       });
+      setIsLoading(false); 
   };
 
 
@@ -59,9 +64,18 @@ const SignUpVerifyAccount: React.FC = () => {
   const isVerifyCodeFilled = verifyCode.every((num) => num !== null);
 
   return (
-    <main className="flex justify-center items-center bg-swSecondary50 mx-auto">
-      <div className="w-3/5 p-2">
-        <p className="text-2xl font-semibold text-swGray800">
+    <main className="flex justify-center items-center bg-swSecondary50 mx-auto h-screen">
+      <div className="w-full sm:w-3/5 p-2">
+        <p className="text-2xl font-semibold text-swGray800 flex gap-2">
+        <span>
+              {" "}
+              <IoIosArrowBack
+              className="mt-1 hover:cursor-pointer"
+                onClick={() => {
+                  router.push("/");
+                }}
+              />{" "}
+            </span>{" "}
           Check your mail!
         </p>
         <p className="text-center mt-2 mb-8 text-[0.86rem] flex items-center justify-center font-light mx-auto">
@@ -121,9 +135,9 @@ const SignUpVerifyAccount: React.FC = () => {
             className="block w-full"
             variant="lightGrey"
             showIcon={false}
-            disabled={!isVerifyCodeFilled || loading} 
+            disabled={!isVerifyCodeFilled || isLoading} 
           >
-            {loading ? "Loading..." : "Confirm"}
+            {isLoading ? "Loading..." : "Confirm"}
           </Button>
         </div>
       </div>

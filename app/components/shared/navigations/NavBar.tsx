@@ -1,9 +1,11 @@
 "use client";
+import { useState } from "react";
 import Button from "../buttons/Button";
 import NavLink from "./NavLink";
 import Logo from "../../../../public/images/nrv-logo.png";
 import Image from "next/image";
-import { Bs0Circle } from "react-icons/bs";
+import { BsList, BsX } from "react-icons/bs";
+
 const navItems = [
   { text: "Home", route: "/" },
   { text: "Feature", route: "/about" },
@@ -13,7 +15,7 @@ const navItems = [
 
 // Create a component to render the navigation items
 const Navigation = () => (
-  <nav className="flex justify-center gap-10">
+  <nav className="flex flex-col md:flex-row md:justify-center gap-4 md:gap-10">
     {navItems.map(({ text, route }, index) => (
       <div key={index}>
         <div>
@@ -25,20 +27,42 @@ const Navigation = () => (
 );
 
 const NavBar = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
   return (
-    <div className="w-full gap-2 flex py-4 px-12">
-      <div className="w-1/4 h-20">
+    <div className="w-full py-4 pr-6 md:px-12 flex justify-between items-center">
+      <div className="flex items-center space-x-4">
         <Image src={Logo} width={200} height={50} alt="logo" className="object-none" />
       </div>
-      <div className="w-2/4 pt-2">
+      <div className="hidden md:flex md:items-center">
         <Navigation />
       </div>
-      <div className="w-1/4 ">
-        <div className="flex gap-10 justify-end">
-          <NavLink className="pt-2" href="/sign-in">
-            Sign In
-          </NavLink>
-          <Button size="large" variant="primary" showIcon={false} >Get Started</Button>
+      <div className="flex items-center space-x-4">
+        <button
+          className="md:hidden text-gray-600 focus:outline-none"
+          onClick={toggleMenu}
+          aria-label="Toggle Menu"
+        >
+          {isMenuOpen ? <BsX size={24} /> : <BsList size={24} />}
+        </button>
+        <div className={`md:hidden ${isMenuOpen ? 'block' : 'hidden'}`}>
+          <Navigation />
+          <div className="md:flex gap-4 justify-end">
+          <div className="pt-3 mb-4">
+          <NavLink href="/sign-in">Sign In</NavLink>
+          </div>
+          <Button size="large" variant="primary" showIcon={false}>Get Started</Button>
+        </div>
+        </div>
+        <div className="hidden md:flex gap-4 justify-end">
+          <div className="pt-3">
+          <NavLink href="/sign-in">Sign In</NavLink>
+          </div>
+          <Button size="large" variant="primary" showIcon={false}>Get Started</Button>
         </div>
       </div>
     </div>

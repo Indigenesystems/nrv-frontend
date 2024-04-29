@@ -13,7 +13,7 @@ const SignUpScreen = () => {
   return (
     <div className="flex justify-center">
       <Carousel />
-      <div className="w-full sm:w-1/2 p-12 justify-center">
+      <div className="w-full sm:w-1/2 p-8 justify-center">
         <SignUpMultiForm />
       </div>
     </div>

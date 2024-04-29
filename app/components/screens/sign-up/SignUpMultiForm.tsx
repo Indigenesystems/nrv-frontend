@@ -3,14 +3,17 @@ import CheckBox from "@/app/components/shared/input-fields/CheckBox";
 import InputField from "@/app/components/shared/input-fields/InputFields";
 import Link from "next/link";
 import React, { useState } from "react";
-import { FaApple } from "react-icons/fa6";
+import { FaApple, FaArrowLeft } from "react-icons/fa6";
 import { FcGoogle } from "react-icons/fc";
 import { IoPersonCircleSharp } from "react-icons/io5";
 import { IoCheckmarkCircleSharp } from "react-icons/io5";
 import { useDispatch, useSelector } from "react-redux";
 import { createUser } from "../../../../redux/slices/userSlice";
 import SignUppVerifyAccountScreen from "./SignUpVerifyAccountScreen";
-
+import { useRouter } from "next/navigation";
+import { IoIosArrowBack } from "react-icons/io";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface FormData {
   firstName: string;
@@ -25,6 +28,7 @@ interface FormData {
 
 const SignUpMultiForm: React.FC = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { loading, error, data } = useSelector((state: any) => state.user);
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -37,6 +41,8 @@ const SignUpMultiForm: React.FC = () => {
     accountType: "",
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [isLoading, setIsLoading] = useState<boolean>(false); // New loading state
+
   const validateForm = () => {
     let errors: { [key: string]: string } = {};
 
@@ -75,7 +81,6 @@ const SignUpMultiForm: React.FC = () => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
 
-
   const handleNext = () => {
     setCurrentStep((prevStep) => prevStep + 1);
   };
@@ -108,21 +113,23 @@ const SignUpMultiForm: React.FC = () => {
     if (!validateForm()) {
       return;
     }
-    await dispatch(createUser(formData) as any)
-      .unwrap()
-      .then(() => {
-        setCurrentStep(3)
-      })
-      .catch((error: any) => {
-        alert(error);
-      });
+    setIsLoading(true); // Set loading state to true when starting the request
+    try {
+      await dispatch(createUser(formData) as any).unwrap();
+      setCurrentStep(3);
+    } catch (error: any) {
+      toast.error(error);
+    } finally {
+      setIsLoading(false); // Set loading state back to false after request completes
+    }
   };
 
   return (
     <div className="container">
+      <ToastContainer />
       {currentStep === 1 && (
         <div>
-          <div className="max-w-md">
+          <div className="max-w-md h-screen">
             <div className="text-3xl text-nrvGreyBlack font-semibold">
               Welcome user 🚀,
             </div>
@@ -210,7 +217,16 @@ const SignUpMultiForm: React.FC = () => {
       )}
       {currentStep === 2 && (
         <div className="max-w-md">
-          <div className="text-2xl text-nrvGreyBlack font-semibold">
+          <div className="text-2xl text-nrvGreyBlack font-semibold flex gap-2">
+            <span>
+              {" "}
+              <IoIosArrowBack
+              className="mt-1 hover:cursor-pointer"
+                onClick={() => {
+                  router.push("/");
+                }}
+              />{" "}
+            </span>{" "}
             Sign up as a landlord 🚀,
           </div>
           <div className="pt-2 text-nrvLightGrey text-md">
@@ -372,13 +388,15 @@ const SignUpMultiForm: React.FC = () => {
           </div>
           <div className="mt-4">
             <Button
-              onClick={handleSubmit as any}
+              onClick={handleSubmit}
               size="large"
               className="block w-full"
               variant="bluebg"
               showIcon={false}
+              disabled={isLoading} // Disable button while loading
             >
-              Continue
+              {isLoading ? "Loading..." : "Continue"}{" "}
+              {/* Show loading text if loading */}
             </Button>
           </div>
         </div>

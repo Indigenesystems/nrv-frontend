@@ -17,9 +17,9 @@ const HoverableCard: React.FC<HoverableCardProps> = ({
 
   return (
     <div
-      className="relative bg-white shadow-md rounded-md transition-width duration-300"
+      className="w-full relative bg-white shadow-md rounded-md transition-width duration-300"
       style={{
-        width: isHovered ? "320px" : "270px",
+        width: isHovered ? "320px" : "250px",
         height: "500px",
         backgroundImage: `url(${imageLink})`,
         backgroundSize: "cover",
