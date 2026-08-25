@@ -20,6 +20,10 @@ export const useAuthRedirect = () => {
   const redirectUser = useCallback((userData: UserData) => {
     const userAccountType = String(userData?.user?.accountType || "").toLowerCase();
     const userStatus = String(userData?.user?.status || "").toLowerCase();
+    const mustChangePassword = Boolean(
+      (userData?.user as { mustChangePassword?: boolean } | undefined)
+        ?.mustChangePassword,
+    );
 
     if (isAccountLoginBlocked(userStatus)) {
       clearAuthSession();
@@ -39,6 +43,23 @@ export const useAuthRedirect = () => {
       setRoleCookie(role);
     }
 
+    // Handle inactive users
+    if (userStatus === "inactive") {
+      // Keep verification inside the sign-in flow (not the sign-up onboarding).
+      // Ensure the verification screen can read the email.
+      if (userData?.user?.email) {
+        localStorage.setItem("emailToVerify", JSON.stringify({ data: { email: userData.user.email } }));
+      }
+      router.push(ROUTES.VERIFY_ACCOUNT);
+      return;
+    }
+
+    // Invited users must set a new password before entering the dashboard.
+    if (userStatus === "active" && mustChangePassword) {
+      router.replace(ROUTES.SET_PASSWORD);
+      return;
+    }
+
     const redirectFromQuery =
       searchParams.get("redirect") || searchParams.get("returnUrl");
 
@@ -55,17 +76,6 @@ export const useAuthRedirect = () => {
       ? safeRedirect.match(/^\/properties\/([^\/?#]+)/)
       : null;
     const redirectPropertyId = propertyMatch?.[1] ?? null;
-
-    // Handle inactive users
-    if (userStatus === "inactive") {
-      // Keep verification inside the sign-in flow (not the sign-up onboarding).
-      // Ensure the verification screen can read the email.
-      if (userData?.user?.email) {
-        localStorage.setItem("emailToVerify", JSON.stringify({ data: { email: userData.user.email } }));
-      }
-      router.push(ROUTES.VERIFY_ACCOUNT);
-      return;
-    }
 
     // Handle active users based on account type
     if (userStatus === "active") {

@@ -10,6 +10,7 @@ export type NrvSessionUser = {
   email?: string;
   accountType?: string;
   status?: string;
+  mustChangePassword?: boolean;
 };
 
 export type NrvSession = {
@@ -104,6 +105,11 @@ export const isTenantAccount = (accountType?: string | null): boolean =>
   String(accountType || "")
     .trim()
     .toLowerCase() === "tenant";
+
+/** Landlord-invited accounts must set a new password before using the app. */
+export const sessionRequiresPasswordChange = (
+  session?: NrvSession | null,
+): boolean => Boolean(session?.user?.mustChangePassword);
 
 /** Suspended / deactivated accounts must not sign in or keep a session. */
 export const isAccountLoginBlocked = (

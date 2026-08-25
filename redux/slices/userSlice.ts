@@ -414,6 +414,50 @@ export const resetPassword = createAsyncThunk<UserToken, ResetPasswordRequest>(
   }
 );
 
+export const setPasswordAfterInvite = createAsyncThunk<
+  UserToken,
+  { newPassword: string; confirmPassword: string }
+>(
+  "user/set-password-after-invite",
+  async (payload, { rejectWithValue, getState }) => {
+    try {
+      const stored = localStorage.getItem("nrv-user");
+      const token = stored ? JSON.parse(stored)?.accessToken : undefined;
+      if (!token) {
+        return rejectWithValue("Please sign in again to set your password.");
+      }
+      const response = await axios.post<{
+        status: string;
+        message: string;
+        data: any;
+      }>(`${API_URL}/users/set-password`, payload, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const updatedUser = response.data.data;
+      const current =
+        (getState() as any).user?.data ||
+        (stored ? JSON.parse(stored) : null) ||
+        {};
+      const userData = {
+        ...current,
+        user: {
+          ...(current?.user || {}),
+          ...updatedUser,
+          mustChangePassword: false,
+        },
+        accessToken: current?.accessToken || token,
+      };
+      localStorage.setItem("nrv-user", JSON.stringify(userData));
+      return userData as UserToken;
+    } catch (error: any) {
+      return rejectWithValue(handleApiError(error));
+    }
+  },
+);
+
 export const endTenancyTenure = createAsyncThunk<UserToken, TenancyRequest>(
   "tenancy/end",
   async ({ id, reason, comment }: TenancyRequest, { rejectWithValue }) => {
@@ -633,6 +677,18 @@ const userSlice = createSlice({
         state.data = action.payload;
       })
       .addCase(resetPassword.rejected, (state, action) => {
+        state.loading = "failed";
+        state.error = action.payload as string;
+      })
+      .addCase(setPasswordAfterInvite.pending, (state) => {
+        state.loading = "pending";
+        state.error = null;
+      })
+      .addCase(setPasswordAfterInvite.fulfilled, (state, action) => {
+        state.loading = "succeeded";
+        state.data = action.payload;
+      })
+      .addCase(setPasswordAfterInvite.rejected, (state, action) => {
         state.loading = "failed";
         state.error = action.payload as string;
       })

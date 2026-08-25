@@ -16,6 +16,7 @@ import {
   isAccountLoginBlocked,
   isLandlordAccount,
   isTenantAccount,
+  sessionRequiresPasswordChange,
   syncRoleCookieFromSession,
 } from "@/lib/authSession";
 
@@ -83,6 +84,14 @@ const TenantProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       if (isAccountLoginBlocked(blockedStatus)) {
         if (!cancelled) {
           deny(getAccountBlockedMessage(blockedStatus));
+        }
+        return;
+      }
+
+      if (sessionRequiresPasswordChange(session)) {
+        if (!cancelled) {
+          setAllowed(false);
+          window.location.replace("/set-password");
         }
         return;
       }

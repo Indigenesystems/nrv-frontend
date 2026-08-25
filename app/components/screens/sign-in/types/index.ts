@@ -14,6 +14,7 @@ export interface UserData {
     accountType: string;
     status: string;
     email?: string;
+    mustChangePassword?: boolean;
   };
   // Current API shape uses `accessToken`; keep `token` optional for legacy usage.
   accessToken?: string;

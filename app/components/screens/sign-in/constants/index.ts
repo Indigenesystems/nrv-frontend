@@ -3,6 +3,7 @@ export const ROUTES = {
   SIGN_UP: "/sign-up",
   FORGOT_PASSWORD: "/forgot-password",
   VERIFY_ACCOUNT: "/verify-account",
+  SET_PASSWORD: "/set-password",
   LANDLORD_DASHBOARD: "/dashboard/landlord",
   TENANT_DASHBOARD: "/dashboard/tenant",
 } as const;
