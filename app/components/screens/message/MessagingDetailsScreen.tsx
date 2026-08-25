@@ -9,6 +9,8 @@ import { IoArrowBack, IoSend } from "react-icons/io5";
 import ConversationDetailsScreen from "./ConversationDetailsScreen";
 import { apiClient } from "@/lib/api";
 import { toast } from "react-toastify";
+import UserAvatar from "@/app/components/shared/UserAvatar";
+import ImageLightbox from "@/app/components/shared/ImageLightbox";
 
 const POLL_INTERVAL_MS = 4000;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -21,42 +23,12 @@ const ALLOWED_IMAGE_TYPES = [
   "image/webp",
 ];
 
-const RandomColorCircle = ({
-  firstName,
-  lastName,
-}: {
-  firstName?: string;
-  lastName?: string;
-}) => {
-  const getColorFromName = () => {
-    const seed = `${firstName ?? ""}${lastName ?? ""}` || "user";
-    let hash = 0;
-    for (let i = 0; i < seed.length; i++) {
-      hash = seed.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const hue = Math.abs(hash) % 360;
-    return `hsl(${hue}, 45%, 42%)`;
-  };
-
-  const initials =
-    `${firstName?.charAt(0) ?? ""}${lastName?.charAt(0) ?? ""}`.toUpperCase() ||
-    "?";
-
-  return (
-    <div
-      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold text-white"
-      style={{ backgroundColor: getColorFromName() }}
-      aria-hidden
-    >
-      {initials}
-    </div>
-  );
-};
-
 type PartnerProfile = {
   _id?: string;
   firstName?: string;
   lastName?: string;
+  email?: string;
+  file?: string | null;
 };
 
 const MessagingDetailsScreen = ({ source }: { source?: string }) => {
@@ -69,6 +41,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
   const [messageContent, setMessageContent] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const [previewAvatar, setPreviewAvatar] = useState<string | null>(null);
   const { id } = useParams();
   const partnerId = Array.isArray(id) ? id[0] : id;
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
@@ -304,7 +277,9 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
 
   const partnerName =
     [partner?.firstName, partner?.lastName].filter(Boolean).join(" ") ||
+    partner?.email ||
     "Conversation";
+  const partnerEmail = partner?.email?.trim() || "";
 
   const renderFilePreviews = () => {
     if (files.length === 0) {
@@ -322,16 +297,26 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
               <button
                 type="button"
                 onClick={() => handleRemoveFile(index)}
-                className="absolute -right-1 -top-1 rounded-full bg-white text-red-500"
+                className="absolute -right-1 -top-1 z-10 rounded-full bg-white text-red-500"
                 aria-label={`Remove ${file.name}`}
               >
                 <FaTimesCircle size={18} />
               </button>
-              <img
-                src={URL.createObjectURL(file)}
-                alt={`preview-${index}`}
-                className="h-16 w-16 rounded-lg object-cover"
-              />
+              <button
+                type="button"
+                className="overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-[#008069]/40"
+                onClick={() =>
+                  setPreviewAvatar(URL.createObjectURL(file))
+                }
+                aria-label={`Preview ${file.name}`}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`preview-${index}`}
+                  className="h-16 w-16 cursor-zoom-in object-cover"
+                />
+              </button>
             </div>
           );
         })}
@@ -343,12 +328,12 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
     !isSending && (Boolean(messageContent.trim()) || files.length > 0);
 
   const renderComposer = () => (
-    <div className="shrink-0 border-t border-gray-200 bg-white px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-4 md:pb-3">
+    <div className="shrink-0 border-t border-[#E9EDEF] bg-[#F0F2F5] px-3 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:px-4 md:pb-3">
       {renderFilePreviews()}
       <div className="flex items-end gap-2 md:gap-3">
         <button
           type="button"
-          className="shrink-0 p-1 text-nrvPrimaryGreen"
+          className="shrink-0 p-1 text-[#008069]"
           onClick={() => document.getElementById(fileInputId)?.click()}
           aria-label="Attach image"
         >
@@ -364,7 +349,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
         />
         <textarea
           rows={1}
-          className="max-h-32 min-h-[44px] flex-1 resize-none rounded-2xl border border-gray-300 px-4 py-2.5 text-sm text-black focus:border-nrvPrimaryGreen focus:outline-none focus:ring-1 focus:ring-nrvPrimaryGreen"
+          className="max-h-32 min-h-[44px] flex-1 resize-none rounded-3xl border-0 bg-white px-4 py-2.5 text-sm text-[#111B21] shadow-sm outline-none focus:ring-2 focus:ring-[#008069]/25"
           placeholder={
             files.length > 0
               ? "Add a caption (optional)…"
@@ -376,7 +361,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
         />
         <button
           type="button"
-          className="shrink-0 rounded-full bg-nrvPrimaryGreen p-2.5 text-white disabled:opacity-50"
+          className="shrink-0 rounded-full bg-[#008069] p-2.5 text-white disabled:opacity-50"
           onClick={() => void handleSendMessage()}
           disabled={!canSend}
           aria-label="Send message"
@@ -415,26 +400,46 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
   const hasMessages = conversation.length > 0;
 
   return (
-    <div className="-mx-2 -mt-3 mb-0 flex h-[calc(100dvh-3.75rem)] max-h-[calc(100dvh-3.75rem)] w-auto flex-col overflow-hidden bg-white sm:-mx-4 md:mx-auto md:mt-0 md:h-[calc(100dvh-6.5rem)] md:max-h-[calc(100dvh-6.5rem)] md:max-w-3xl md:rounded-2xl md:border md:border-gray-200 md:shadow-sm lg:h-[calc(100dvh-5.5rem)] lg:max-h-[calc(100dvh-5.5rem)]">
-      <div className="flex shrink-0 items-center gap-3 border-b border-gray-200 px-3 py-3 md:px-4">
+    <div className="-mx-2 -mt-3 mb-0 flex h-[calc(100dvh-3.75rem)] max-h-[calc(100dvh-3.75rem)] w-auto flex-col overflow-hidden bg-[#ECE5DD] sm:-mx-4 md:mx-auto md:mt-0 md:h-[calc(100dvh-6.5rem)] md:max-h-[calc(100dvh-6.5rem)] md:max-w-3xl md:rounded-2xl md:border md:border-gray-200 md:shadow-sm lg:h-[calc(100dvh-5.5rem)] lg:max-h-[calc(100dvh-5.5rem)]">
+      <div className="flex shrink-0 items-center gap-3 border-b border-[#008069]/30 bg-[#008069] px-3 py-2.5 text-white md:px-4">
         <button
           type="button"
-          className="shrink-0 p-1"
+          className="shrink-0 rounded-full p-1 hover:bg-white/10"
           onClick={() => router.back()}
           aria-label="Go back"
         >
-          <IoArrowBack size={22} className="text-nrvDarkGrey" />
+          <IoArrowBack size={22} />
         </button>
-        <RandomColorCircle
-          firstName={partner?.firstName}
-          lastName={partner?.lastName}
-        />
+        <button
+          type="button"
+          className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-white/40"
+          onClick={() => {
+            if (partner?.file) {
+              setPreviewAvatar(String(partner.file));
+            }
+          }}
+          aria-label={
+            partner?.file
+              ? `View ${partnerName}'s profile photo`
+              : partnerName
+          }
+          disabled={!partner?.file}
+        >
+          <UserAvatar
+            src={partner?.file}
+            name={partnerName}
+            size="md"
+            light
+            className={`!h-10 !w-10 ${partner?.file ? "cursor-zoom-in" : ""}`}
+          />
+        </button>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-nrvDarkGrey">
-            {partnerName}
-          </p>
-          <p className="text-xs text-gray-500">
-            {isLandlordView ? "Tenant conversation" : "Landlord conversation"}
+          <p className="truncate text-sm font-semibold">{partnerName}</p>
+          <p className="truncate text-xs text-white/80">
+            {partnerEmail ||
+              (isLandlordView
+                ? "Tenant conversation"
+                : "Landlord conversation")}
           </p>
         </div>
       </div>
@@ -448,8 +453,8 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
         ) : (
           <div className="flex h-full flex-col items-center justify-center py-8 text-center">
             <EmptyState />
-            <p className="mt-2 text-sm text-nrvLightGrey">No messages yet</p>
-            <p className="mt-1 max-w-xs text-xs text-gray-400">
+            <p className="mt-2 text-sm text-[#111B21]">No messages yet</p>
+            <p className="mt-1 max-w-xs text-xs text-[#667781]">
               Send a text or photo to start the conversation. New messages
               appear here automatically.
             </p>
@@ -458,6 +463,12 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
       </div>
 
       {renderComposer()}
+
+      <ImageLightbox
+        src={previewAvatar}
+        alt={`${partnerName} profile photo`}
+        onClose={() => setPreviewAvatar(null)}
+      />
     </div>
   );
 };

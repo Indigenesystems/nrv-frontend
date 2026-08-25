@@ -108,14 +108,13 @@ const TenantScreen = () => {
   const [openUploadAgreementDocsModal, setOpenUploadAgreementDocsModal] =
     useState(false);
 
-  const [openEndTenancyModal, setOpenTenancyModal] = useState(false);
+  const [openEndTenancyModal, setOpenEndTenancyModal] = useState(false);
   const [viewDocs, setViewDocs] = useState<boolean>(false);
   const [fileUrl, setFileUrl] = useState<string>("");
   const [tenantDetails, setTenantDetails] = useState<any>({});
   const [viewerVisible, setViewerVisible] = useState<boolean>(true);
   const [isVisible, setIsVisible] = useState(false);
   const [pdf, setPdf] = useState<any>(null);
-  const [openAddTenantModal, setOpenAddTenantModal] = useState(false);
   const [openExtendLeaseModal, setOpenExtendLeaseModal] = useState(false);
   const [verifyModalOpen, setVerifyModalOpen] = useState(false);
   const [confirmAction, setConfirmAction] = useState<
@@ -201,7 +200,7 @@ const TenantScreen = () => {
       toast.error(message);
     } finally {
       setSubmitting(false);
-      setOpenAddTenantModal(false);
+      setOpenEndTenancyModal(false);
       await refreshApplication();
     }
   };
@@ -255,7 +254,6 @@ const TenantScreen = () => {
       toast.error(message);
     } finally {
       setSubmitting(false);
-      setOpenAddTenantModal(false);
     }
   };
 
@@ -348,7 +346,6 @@ const TenantScreen = () => {
       );
     } finally {
       setSubmitting(false);
-      setOpenAddTenantModal(false);
       setOpenAssignDateModal(false);
     }
   };
@@ -741,7 +738,7 @@ const TenantScreen = () => {
                       type="button"
                       variant="outline"
                       className="w-full border-amber-300 text-amber-950 hover:bg-amber-100"
-                      onClick={() => setOpenAddTenantModal(true)}
+                      onClick={() => setOpenEndTenancyModal(true)}
                       aria-label="End tenancy and leave a comment"
                     >
                       End tenancy & comment
@@ -763,7 +760,7 @@ const TenantScreen = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setOpenAddTenantModal(true)}
+                    onClick={() => setOpenEndTenancyModal(true)}
                     className="flex w-full items-center justify-between rounded-xl border border-gray-200 p-3 text-left text-sm transition hover:bg-gray-50"
                   >
                     <span className="font-medium text-nrvGreyBlack">
@@ -1244,8 +1241,8 @@ const TenantScreen = () => {
       </Modal>
 
       <EndTenancyLeaseModal
-        isOpen={openAddTenantModal}
-        onClose={() => setOpenAddTenantModal(false)}
+        isOpen={openEndTenancyModal}
+        onClose={() => setOpenEndTenancyModal(false)}
         recordId={id}
         onSubmit={async (values) => {
           await endTenancy(

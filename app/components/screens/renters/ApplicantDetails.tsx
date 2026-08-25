@@ -23,6 +23,7 @@ import {
   extendTenancyTenure,
 } from "@/redux/slices/userSlice";
 import { getFileExtension } from "@/helpers/utils";
+import { formatEndTenancySummary } from "@/lib/applicationDisplay";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { Label } from "@/components/ui/label";
@@ -534,8 +535,24 @@ const ApplicationDetails = () => {
               </div>
             </div>
           </div>
+          {(application?.status === "Ended" ||
+            application?.status === "ended" ||
+            application?.status === "Expired" ||
+            application?.status === "expired") &&
+            formatEndTenancySummary(application) && (
+              <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-[#667085]">
+                  Reason tenancy ended
+                </p>
+                <p className="mt-1 text-sm font-semibold text-gray-900">
+                  {formatEndTenancySummary(application)}
+                </p>
+              </div>
+            )}
           {(application?.status === "Active_lease" ||
             application?.status === "active" ||
+            application?.status === "Expired" ||
+            application?.status === "expired" ||
             String(application?.status || "").toLowerCase() === "active_lease") && (
             <div className="mt-4">
               <Button

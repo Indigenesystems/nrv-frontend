@@ -22,6 +22,7 @@ import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
 import FileUploader from "../shared/upload/FileUploader";
 import Viewer from "react-viewer";
 import { getFileExtension } from "@/helpers/utils";
+import { formatEndTenancySummary } from "@/lib/applicationDisplay";
 import FormikInputField from "../shared/input-fields/FormikInputField";
 import * as yup from "yup";
 import SelectDate from "../shared/SelectDate";
@@ -431,6 +432,18 @@ const CurrentTenantDashboard: React.FC<Data> = ({ data }) => {
                       )}
                     </p>
                   </div>
+                  {formatEndTenancySummary(tenantDetails?.data?.finalResult) && (
+                    <div className="md:col-span-2">
+                      <p className="text-[#475367] text-xs">
+                        Reason tenancy ended
+                      </p>
+                      <p className="text-[#1D2739] pt-1.5 text-[13px]">
+                        {formatEndTenancySummary(
+                          tenantDetails?.data?.finalResult,
+                        )}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 mt-6 w-full">

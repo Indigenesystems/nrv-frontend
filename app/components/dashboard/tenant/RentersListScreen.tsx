@@ -1,188 +1,317 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import LoadingPage from "../../../components/loaders/LoadingPage";
-import LandLordLayout from "../../../components/layout/LandLordLayout";
-import Button from "../../../components/shared/buttons/Button";
-import { IoAddCircle } from "react-icons/io5";
+import React, { useState, useEffect, useMemo } from "react";
+import EmptyState from "../../../components/screens/empty-state/EmptyState";
 import { useRouter } from "next/navigation";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getPropertyByUserId,
-  getRentedApartmentsForTenant,
-} from "../../../../redux/slices/propertySlice";
-import CenterModal from "@/app/components/shared/modals/CenterModal";
-import TenantLayout from "@/app/components/layout/TenantLayout";
-import { FcHome } from "react-icons/fc";
-import { FaPen } from "react-icons/fa";
-import { FaPencil } from "react-icons/fa6";
+import { useDispatch } from "react-redux";
+import { getRentedApartmentsForTenant } from "../../../../redux/slices/propertySlice";
+import { apiClient } from "@/lib/api";
+import UserAvatar from "@/app/components/shared/UserAvatar";
+import ImageLightbox from "@/app/components/shared/ImageLightbox";
+import { Search } from "lucide-react";
 
-const RandomColorCircle = ({ firstName, lastName }: any) => {
-  // Function to generate random color
-  const getRandomColor = () => {
-    const letters = "0123456789ABCDEF";
-    let color = "#";
-    for (let i = 0; i < 6; i++) {
-      color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-  };
+type ChatRow = {
+  partnerId: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  file?: string | null;
+  lastMessage?: string;
+  lastMessageAt?: string | Date | null;
+};
 
-  // Get initials
-  const initials = `${firstName?.charAt(0)}${lastName?.charAt(0)}`;
+const getOwnerId = (item: any): string | null => {
+  const owner = item?.ownerId;
+  if (!owner) {
+    return null;
+  }
+  if (typeof owner === "string") {
+    return owner;
+  }
+  return owner?._id ? String(owner._id) : null;
+};
 
-  // Styles for the circle with random background color
-  const circleStyle = {
-    backgroundColor: getRandomColor(),
-    width: "50px", // adjust size as needed
-    height: "50px", // adjust size as needed
-    borderRadius: "50%",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    color: "#fff", // Text color (white)
-    fontWeight: "bold",
-    fontSize: "18px", // Adjust font size as needed
-  };
+const getDisplayName = (row: ChatRow) => {
+  const name = `${row.firstName || ""} ${row.lastName || ""}`.trim();
+  return name || row.email || "Landlord";
+};
 
-  return (
-    <div className="w-1/7">
-      <div style={circleStyle}>{initials}</div>
-    </div>
-  );
+const formatChatTime = (value?: string | Date | null) => {
+  if (!value) {
+    return "";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const now = new Date();
+  const isToday =
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate();
+
+  if (isToday) {
+    return new Intl.DateTimeFormat("en-NG", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(date);
+  }
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday =
+    date.getFullYear() === yesterday.getFullYear() &&
+    date.getMonth() === yesterday.getMonth() &&
+    date.getDate() === yesterday.getDate();
+
+  if (isYesterday) {
+    return "Yesterday";
+  }
+
+  return new Intl.DateTimeFormat("en-NG", {
+    day: "numeric",
+    month: "short",
+  }).format(date);
 };
 
 const RentersListScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<any>({});
-  const [properties, setProperties] = useState<any[]>([]);
-  const [page, setPage] = useState(1); // Current page
-  const [totalPages, setTotalPages] = useState(0); // Total pages
-  const [isPageLoading, setIsPageLoading] = useState(false); // New state for page loading
-
+  const [page] = useState(1);
+  const [chats, setChats] = useState<ChatRow[]>([]);
+  const [search, setSearch] = useState("");
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const fetchData = async () => {
-    const user = JSON.parse(localStorage.getItem("nrv-user") as any);
-    setUser(user?.user);
-    const formData = {
-      id: user?.user?._id,
-      page: page,
-    };
+  const fetchCombinedData = async () => {
+    const stored = JSON.parse(localStorage.getItem("nrv-user") as any);
+    const tenantId = stored?.user?._id;
+    if (!tenantId) {
+      setChats([]);
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const response = await dispatch(
-        getRentedApartmentsForTenant(formData) as any
-      ); 
-      // console.log({reponse: response?.payload?.data});
-      const uniqueOwners: any = new Map(); // Use a Map to ensure uniqueness by ownerId
+      const [rentedResponse, partnersResponse] = await Promise.all([
+        dispatch(
+          getRentedApartmentsForTenant({
+            id: tenantId,
+            page,
+          }) as any,
+        ),
+        apiClient.get(`/messages/partners/${tenantId}`).catch(() => null),
+      ]);
 
-      response?.payload?.data.forEach((item: any) => {
-          if (!uniqueOwners.has(item.ownerId)) {
-              uniqueOwners.set(item.ownerId, item);
-          }
+      const rentedRows = rentedResponse?.payload?.data || [];
+      const partnerRows = partnersResponse?.data?.data || [];
+      const uniqueChats = new Map<string, ChatRow>();
+
+      rentedRows.forEach((item: any) => {
+        const partnerId = getOwnerId(item);
+        if (!partnerId) {
+          return;
+        }
+        const owner =
+          typeof item?.ownerId === "object" && item?.ownerId
+            ? item.ownerId
+            : {};
+        const existing = uniqueChats.get(partnerId);
+        uniqueChats.set(partnerId, {
+          partnerId,
+          firstName: owner?.firstName || existing?.firstName,
+          lastName: owner?.lastName || existing?.lastName,
+          email: owner?.email || existing?.email,
+          file: owner?.file || existing?.file || null,
+          lastMessage: existing?.lastMessage,
+          lastMessageAt: existing?.lastMessageAt,
+        });
       });
-      
-      const uniqueOwnerArray = Array.from(uniqueOwners.values());
-      setProperties(uniqueOwnerArray);
-      setTotalPages(response?.totalPages);
+
+      partnerRows.forEach((partner: any) => {
+        const partnerId = String(partner?.partnerId || "");
+        if (!partnerId) {
+          return;
+        }
+        const user = partner?.partner || {};
+        const existing = uniqueChats.get(partnerId);
+        uniqueChats.set(partnerId, {
+          partnerId,
+          firstName: user?.firstName || existing?.firstName,
+          lastName: user?.lastName || existing?.lastName,
+          email: user?.email || existing?.email,
+          file: user?.file || existing?.file || null,
+          lastMessage: partner?.lastMessage || existing?.lastMessage,
+          lastMessageAt: partner?.lastMessageAt || existing?.lastMessageAt,
+        });
+      });
+
+      const sorted = Array.from(uniqueChats.values()).sort((a, b) => {
+        const aTime = a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0;
+        const bTime = b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0;
+        return bTime - aTime;
+      });
+
+      setChats(sorted);
     } catch (error) {
-      console.error("Error fetching properties:", error);
+      console.error("Error fetching tenant conversations:", error);
+      setChats([]);
     } finally {
       setIsLoading(false);
-      setIsPageLoading(false); // Stop page loading after fetch
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, [page]); // Reload properties when page changes
+    void fetchCombinedData();
+  }, [page]);
 
-  const handleNextPage = () => {
-    if (page) {
-      setIsPageLoading(true);
-      setPage(page + 1);
+  const filteredChats = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) {
+      return chats;
     }
-  };
-
-  const handlePrevPage = () => {
-    if (page > 1) {
-      setIsPageLoading(true);
-      setPage(page - 1);
-    }
-  };
+    return chats.filter((chat) => {
+      const name = getDisplayName(chat).toLowerCase();
+      const email = String(chat.email || "").toLowerCase();
+      return name.includes(query) || email.includes(query);
+    });
+  }, [chats, search]);
 
   return (
-    <div className="p-4 w-full">
-      <div className="text-xl">Messages 🏘️</div>
+    <div className="-mx-2 -mt-3 mb-0 flex h-[calc(100dvh-3.75rem)] max-h-[calc(100dvh-3.75rem)] w-auto flex-col overflow-hidden bg-[#F0F2F5] sm:-mx-4 md:mx-auto md:mt-0 md:h-[calc(100dvh-6.5rem)] md:max-h-[calc(100dvh-6.5rem)] md:max-w-3xl md:rounded-2xl md:border md:border-gray-200 md:shadow-sm lg:h-[calc(100dvh-5.5rem)] lg:max-h-[calc(100dvh-5.5rem)]">
+      <div className="shrink-0 border-b border-[#E9EDEF] bg-[#008069] px-4 py-3 text-white">
+        <h1 className="text-lg font-semibold tracking-tight">Messages</h1>
+        <p className="mt-0.5 text-xs text-white/80">
+          Chat with your landlord
+        </p>
+      </div>
 
-      {isLoading ? (
-        <div className="md:mx-auto mt-8 mx-4 space-y-4">
-          {[...Array(3)].map((_, index) => (
-            <div key={index} className="p-4 rounded-lg w-full flex justify-between items-center bg-white border border-gray-100 animate-pulse">
-              <div className="flex gap-4 items-center w-full">
-                <div className="w-12 h-12 rounded-full bg-gray-200 flex-shrink-0"></div>
-                <div className="space-y-2 w-full max-w-sm">
-                  <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                  <div className="h-3 bg-gray-100 rounded w-3/4"></div>
+      <div className="shrink-0 border-b border-[#E9EDEF] bg-white px-3 py-2.5">
+        <label className="relative block" htmlFor="tenant-messages-search">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#54656F]"
+            aria-hidden
+          />
+          <input
+            id="tenant-messages-search"
+            type="search"
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+            placeholder="Search name or email"
+            className="h-10 w-full rounded-lg bg-[#F0F2F5] py-2 pl-10 pr-3 text-sm text-[#111B21] outline-none placeholder:text-[#667781] focus:ring-2 focus:ring-[#008069]/25"
+            aria-label="Search conversations"
+          />
+        </label>
+      </div>
+
+      <div className="min-h-0 flex-1 overflow-y-auto bg-white">
+        {isLoading ? (
+          <div className="divide-y divide-[#F0F2F5]">
+            {[...Array(5)].map((_, index) => (
+              <div key={index} className="flex items-center gap-3 px-4 py-3">
+                <div className="h-12 w-12 animate-pulse rounded-full bg-gray-200" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="h-3.5 w-1/2 animate-pulse rounded bg-gray-200" />
+                  <div className="h-3 w-3/4 animate-pulse rounded bg-gray-100" />
                 </div>
               </div>
-              <div className="w-8 h-8 rounded-full bg-gray-100 flex-shrink-0"></div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div>
-          {properties?.length < 1 ? (
-            <div className="">
-              <div className="flex justify-center items-center">
-                <div className="mt-6 w-full max-w-md rounded-2xl border border-gray-200 bg-white p-4 text-center sm:p-8">
-                  <div className="mx-auto w-12 h-12 rounded-full bg-emerald-50 border border-emerald-100 flex items-center justify-center mb-4">
-                    <svg className="w-6 h-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" />
-                    </svg>
-                  </div>
-                  <p className="text-gray-700 font-medium">No conversations yet</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    Start a chat from a rented apartment when available.
-                  </p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="md:mx-auto mt-8 mx-4 ">
-              {properties?.map((property: any) => (
-                <div
-                  key={property.id}
-                  className="p-2 rounded rounded-lg w-full mt-8 flex justify-between"
-                  onClick={() => {
-                    router.push(
-                      `/dashboard/tenant/messages/${property.ownerId._id}`
-                    );
-                  }}
-                >
-                  <div className="w-full">
-                    <div className="flex gap-2 items-center">
-                      <p className="w-full text-sm text-nrvDarkGrey font-medium mt-1">
-                        {property.ownerId?.firstName}{" "}
-                        {property.ownerId?.lastName}
+            ))}
+          </div>
+        ) : filteredChats.length < 1 ? (
+          <div className="flex h-full flex-col items-center justify-center px-6 py-12 text-center">
+            <EmptyState />
+            <p className="mt-2 text-sm font-medium text-[#111B21]">
+              {search.trim()
+                ? "No matching conversations"
+                : "No conversations yet"}
+            </p>
+            <p className="mt-1 max-w-xs text-xs text-[#667781]">
+              {search.trim()
+                ? "Try another name or email."
+                : "Start a chat from a rented apartment when available."}
+            </p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-[#F0F2F5]" role="list">
+            {filteredChats.map((chat) => {
+              const displayName = getDisplayName(chat);
+              const preview =
+                chat.lastMessage?.trim() || "Tap to start chatting";
+              const timeLabel = formatChatTime(chat.lastMessageAt);
+
+              return (
+                <li key={chat.partnerId}>
+                  <div className="flex w-full items-center gap-3 px-3 py-3 transition hover:bg-[#F5F6F6]">
+                    <button
+                      type="button"
+                      className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-[#008069]/40"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        if (chat.file) {
+                          setPreviewImage(String(chat.file));
+                        } else {
+                          router.push(
+                            `/dashboard/tenant/messages/${chat.partnerId}`,
+                          );
+                        }
+                      }}
+                      aria-label={
+                        chat.file
+                          ? `View ${displayName}'s profile photo`
+                          : `Open chat with ${displayName}`
+                      }
+                    >
+                      <UserAvatar
+                        src={chat.file}
+                        name={displayName}
+                        size="md"
+                        className={`!h-12 !w-12 !text-sm ${chat.file ? "cursor-zoom-in" : ""}`}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      className="min-w-0 flex-1 text-left focus:outline-none"
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/tenant/messages/${chat.partnerId}`,
+                        )
+                      }
+                      aria-label={`Open chat with ${displayName}`}
+                    >
+                      <div className="flex items-baseline justify-between gap-2">
+                        <p className="truncate text-[15px] font-semibold text-[#111B21]">
+                          {displayName}
+                        </p>
+                        {timeLabel ? (
+                          <span className="shrink-0 text-[11px] text-[#667781]">
+                            {timeLabel}
+                          </span>
+                        ) : null}
+                      </div>
+                      {chat.email ? (
+                        <p className="mt-0.5 truncate text-xs text-[#008069]">
+                          {chat.email}
+                        </p>
+                      ) : null}
+                      <p className="mt-0.5 truncate text-[13px] text-[#667781]">
+                        {preview}
                       </p>
-                    </div>
+                    </button>
                   </div>
-                  <div className="w-1/5 text-end flex flex-col justify-between h-full">
-          
-                    <FaPencil
-                      className="cursor-pointer"
-                      color="grey"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      <ImageLightbox
+        src={previewImage}
+        alt="Profile photo"
+        onClose={() => setPreviewImage(null)}
+      />
     </div>
   );
 };

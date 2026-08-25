@@ -21,6 +21,7 @@ import { assignDateTenancyTenure, createUserByLandlord, endTenancyTenure, extend
 import EndTenancyLeaseModal from "../../shared/EndTenancyLeaseModal";
 import { apiService } from "@/lib/api";
 import {
+  formatEndTenancySummary,
   getApplicationCurrentResidence,
   getApplicationEmployer,
   getApplicationJobTitle,
@@ -529,6 +530,19 @@ const TenantTable = () => {
                 label: "Applied Date & Time",
                 render: (val) => <span>{formatDateToWords(val)}</span>,
               },
+              ...(activeTab === "ended"
+                ? [
+                    {
+                      key: "endTenancyReason",
+                      label: "End Reason",
+                      render: (_val: unknown, row: BaseRow) => (
+                        <span className="text-sm text-gray-700">
+                          {formatEndTenancySummary(row) || "—"}
+                        </span>
+                      ),
+                    },
+                  ]
+                : []),
             ]}
           />
         </div>

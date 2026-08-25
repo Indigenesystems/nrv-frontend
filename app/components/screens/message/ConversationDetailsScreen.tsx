@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { AiOutlineCheck } from "react-icons/ai";
+import ImageLightbox from "@/app/components/shared/ImageLightbox";
 
 interface Message {
   _id: string;
@@ -102,15 +103,15 @@ const ConversationDetailsScreen: React.FC<ConversationDetailsScreenProps> = ({
                 }`}
               >
                 <div
-                  className={`w-fit max-w-xs rounded-lg p-3 ${
+                  className={`w-fit max-w-xs rounded-lg p-3 shadow-sm ${
                     isSender
-                      ? "bg-nrvPrimaryGreen text-white"
-                      : "bg-gray-200 text-black"
+                      ? "bg-[#DCF8C6] text-[#111B21]"
+                      : "bg-white text-[#111B21]"
                   }`}
                   style={{
                     borderRadius: isSender
-                      ? "18px 18px 0 18px"
-                      : "18px 18px 18px 0",
+                      ? "8px 8px 0 8px"
+                      : "8px 8px 8px 0",
                   }}
                 >
                   {text ? (
@@ -129,12 +130,19 @@ const ConversationDetailsScreen: React.FC<ConversationDetailsScreenProps> = ({
                             className="flex flex-col items-start"
                           >
                             {showAsImage && (
-                              <img
-                                src={file}
-                                alt={`attachment-${index}`}
-                                className="h-40 w-60 cursor-pointer rounded-lg object-cover"
+                              <button
+                                type="button"
+                                className="block overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-[#008069]/40"
                                 onClick={() => handleImageClick(file)}
-                              />
+                                aria-label="View full size image"
+                              >
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={file}
+                                  alt={`attachment-${index}`}
+                                  className="h-40 w-60 cursor-zoom-in object-cover transition hover:opacity-95"
+                                />
+                              </button>
                             )}
 
                             {showAsPdf && (
@@ -143,9 +151,7 @@ const ConversationDetailsScreen: React.FC<ConversationDetailsScreenProps> = ({
                                   href={file}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className={`text-sm underline ${
-                                    isSender ? "text-white" : "text-blue-500"
-                                  }`}
+                                  className="text-sm text-[#027EB5] underline"
                                 >
                                   Open PDF
                                 </a>
@@ -162,9 +168,7 @@ const ConversationDetailsScreen: React.FC<ConversationDetailsScreenProps> = ({
                                 href={file}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className={`text-sm underline ${
-                                  isSender ? "text-white" : "text-blue-500"
-                                }`}
+                                className="text-sm text-[#027EB5] underline"
                               >
                                 Open attachment
                               </a>
@@ -176,18 +180,14 @@ const ConversationDetailsScreen: React.FC<ConversationDetailsScreenProps> = ({
                   )}
 
                   <div className="mt-2 flex items-center justify-between">
-                    <p
-                      className={`text-[10px] ${
-                        isSender ? "text-gray-300" : "text-gray-500"
-                      }`}
-                    >
+                    <p className="text-[10px] text-[#667781]">
                       {new Date(message.createdAt).toLocaleTimeString([], {
                         hour: "2-digit",
                         minute: "2-digit",
                       })}
                     </p>
                     {isSender && (
-                      <span className="ml-2 flex items-center text-[10px] text-gray-300">
+                      <span className="ml-2 flex items-center text-[10px] text-[#53BDEB]">
                         <AiOutlineCheck />
                       </span>
                     )}
@@ -199,32 +199,11 @@ const ConversationDetailsScreen: React.FC<ConversationDetailsScreenProps> = ({
         })}
       <div ref={messageEndRef} />
 
-      {previewImage && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70"
-          onClick={closePreview}
-          role="button"
-          tabIndex={0}
-          aria-label="Close image preview"
-          onKeyDown={(event) => {
-            if (
-              event.key === "Enter" ||
-              event.key === "Escape" ||
-              event.key === " "
-            ) {
-              event.preventDefault();
-              closePreview();
-            }
-          }}
-        >
-          <img
-            src={previewImage}
-            alt="Preview"
-            className="max-h-full max-w-full object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
+      <ImageLightbox
+        src={previewImage}
+        alt="Message attachment"
+        onClose={closePreview}
+      />
     </div>
   );
 };
