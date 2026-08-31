@@ -349,7 +349,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
         />
         <textarea
           rows={1}
-          className="max-h-32 min-h-[44px] flex-1 resize-none rounded-3xl border-0 bg-white px-4 py-2.5 text-sm text-[#111B21] shadow-sm outline-none focus:ring-2 focus:ring-[#008069]/25"
+          className="max-h-32 min-h-[44px] flex-1 resize-none rounded-3xl border-0 bg-white px-4 py-2.5 text-base text-[#111B21] shadow-sm outline-none touch-manipulation focus:ring-2 focus:ring-[#008069]/25 md:text-sm"
           placeholder={
             files.length > 0
               ? "Add a caption (optional)…"
@@ -400,7 +400,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
   const hasMessages = conversation.length > 0;
 
   return (
-    <div className="-mx-2 -mt-3 mb-0 flex h-[calc(100dvh-3.75rem)] max-h-[calc(100dvh-3.75rem)] w-auto flex-col overflow-hidden bg-[#ECE5DD] sm:-mx-4 md:mx-auto md:mt-0 md:h-[calc(100dvh-6.5rem)] md:max-h-[calc(100dvh-6.5rem)] md:max-w-3xl md:rounded-2xl md:border md:border-gray-200 md:shadow-sm lg:h-[calc(100dvh-5.5rem)] lg:max-h-[calc(100dvh-5.5rem)]">
+    <div className="-mx-2 -mt-3 mb-0 flex h-[calc(100lvh-3.75rem)] max-h-[calc(100lvh-3.75rem)] w-auto flex-col overflow-hidden bg-[#ECE5DD] sm:-mx-4 md:mx-auto md:mt-0 md:h-[calc(100dvh-6.5rem)] md:max-h-[calc(100dvh-6.5rem)] md:max-w-3xl md:rounded-2xl md:border md:border-gray-200 md:shadow-sm lg:h-[calc(100dvh-5.5rem)] lg:max-h-[calc(100dvh-5.5rem)]">
       <div className="flex shrink-0 items-center gap-3 border-b border-[#008069]/30 bg-[#008069] px-3 py-2.5 text-white md:px-4">
         <button
           type="button"
