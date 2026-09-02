@@ -304,7 +304,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
               </button>
               <button
                 type="button"
-                className="overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-[#008069]/40"
+                className="overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03442C]/40"
                 onClick={() =>
                   setPreviewAvatar(URL.createObjectURL(file))
                 }
@@ -333,7 +333,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
       <div className="flex items-end gap-2 md:gap-3">
         <button
           type="button"
-          className="shrink-0 p-1 text-[#008069]"
+          className="shrink-0 p-1 text-[#03442C]"
           onClick={() => document.getElementById(fileInputId)?.click()}
           aria-label="Attach image"
         >
@@ -349,7 +349,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
         />
         <textarea
           rows={1}
-          className="max-h-32 min-h-[44px] flex-1 resize-none rounded-3xl border-0 bg-white px-4 py-2.5 text-base text-[#111B21] shadow-sm outline-none touch-manipulation focus:ring-2 focus:ring-[#008069]/25 md:text-sm"
+          className="max-h-32 min-h-[44px] flex-1 resize-none rounded-3xl border-0 bg-white px-4 py-2.5 text-base text-[#111B21] shadow-sm outline-none touch-manipulation focus:ring-2 focus:ring-[#03442C]/25 md:text-sm"
           placeholder={
             files.length > 0
               ? "Add a caption (optional)…"
@@ -361,7 +361,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
         />
         <button
           type="button"
-          className="shrink-0 rounded-full bg-[#008069] p-2.5 text-white disabled:opacity-50"
+          className="shrink-0 rounded-full bg-[#03442C] p-2.5 text-white disabled:opacity-50"
           onClick={() => void handleSendMessage()}
           disabled={!canSend}
           aria-label="Send message"
@@ -401,7 +401,7 @@ const MessagingDetailsScreen = ({ source }: { source?: string }) => {
 
   return (
     <div className="-mx-2 -mt-3 mb-0 flex h-[calc(100lvh-3.75rem)] max-h-[calc(100lvh-3.75rem)] w-auto flex-col overflow-hidden bg-[#ECE5DD] sm:-mx-4 md:mx-auto md:mt-0 md:h-[calc(100dvh-6.5rem)] md:max-h-[calc(100dvh-6.5rem)] md:max-w-3xl md:rounded-2xl md:border md:border-gray-200 md:shadow-sm lg:h-[calc(100dvh-5.5rem)] lg:max-h-[calc(100dvh-5.5rem)]">
-      <div className="flex shrink-0 items-center gap-3 border-b border-[#008069]/30 bg-[#008069] px-3 py-2.5 text-white md:px-4">
+      <div className="flex shrink-0 items-center gap-3 border-b border-[#03442C]/30 bg-[#03442C] px-3 py-2.5 text-white md:px-4">
         <button
           type="button"
           className="shrink-0 rounded-full p-1 hover:bg-white/10"

@@ -2,7 +2,6 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -156,14 +155,9 @@ const LandLordSideBar: React.FC<LandLordSideBarProps> = ({ isOpen }) => {
             }
           }}
         >
-          <Image
-            src="/images/nrvlogo.jpg"
-            alt="NaijaRentVerify"
-            width={150}
-            height={52}
-            className="h-9 w-auto max-w-full object-contain"
-            priority
-          />
+          <span className="text-sm font-bold tracking-wide text-white whitespace-nowrap">
+            NAIJARENTVERIFY
+          </span>
         </div>
 
         {displayCredits && (

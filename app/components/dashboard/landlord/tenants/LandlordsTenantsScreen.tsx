@@ -416,6 +416,18 @@ const LandlordsTenantsScreen = () => {
                         </span>
                       ),
                     },
+                    {
+                      key: "tenancyComments",
+                      label: "Comments",
+                      render: (val: unknown) => {
+                        const count = Array.isArray(val) ? val.length : 0;
+                        return (
+                          <span className="text-sm text-gray-700">
+                            {count}
+                          </span>
+                        );
+                      },
+                    },
                   ]
                 : []),
             ]}

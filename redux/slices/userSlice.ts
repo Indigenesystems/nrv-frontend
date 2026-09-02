@@ -479,6 +479,30 @@ export const endTenancyTenure = createAsyncThunk<UserToken, TenancyRequest>(
   }
 );
 
+export const addTenancyComment = createAsyncThunk<
+  any,
+  { id: string; comment: string; authorId?: string }
+>(
+  "tenancy/comment",
+  async ({ id, comment, authorId }, { rejectWithValue }) => {
+    try {
+      const response = await axios.post<ApiResponse<any>>(
+        `${API_URL}/rooms/${id}/tenancy-comments`,
+        {
+          comment,
+          authorId,
+        },
+        {
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+      return response.data.data;
+    } catch (error: any) {
+      return rejectWithValue(handleApiError(error));
+    }
+  },
+);
+
 export const extendTenancyTenure = createAsyncThunk<UserToken, TenancyRequest>(
   "tenancy/update",
   async ({ id, rentEndDate }: TenancyRequest, { rejectWithValue }) => {

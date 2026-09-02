@@ -181,7 +181,7 @@ const RentersListScreen = () => {
 
   return (
     <div className="-mx-2 -mt-3 mb-0 flex h-[calc(100dvh-3.75rem)] max-h-[calc(100dvh-3.75rem)] w-auto flex-col overflow-hidden bg-[#F0F2F5] sm:-mx-4 md:mx-auto md:mt-0 md:h-[calc(100dvh-6.5rem)] md:max-h-[calc(100dvh-6.5rem)] md:max-w-3xl md:rounded-2xl md:border md:border-gray-200 md:shadow-sm lg:h-[calc(100dvh-5.5rem)] lg:max-h-[calc(100dvh-5.5rem)]">
-      <div className="shrink-0 border-b border-[#E9EDEF] bg-[#008069] px-4 py-3 text-white">
+      <div className="shrink-0 border-b border-[#E9EDEF] bg-[#03442C] px-4 py-3 text-white">
         <h1 className="text-lg font-semibold tracking-tight">Messages</h1>
         <p className="mt-0.5 text-xs text-white/80">
           Chat with your landlord
@@ -200,7 +200,7 @@ const RentersListScreen = () => {
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search name or email"
-            className="h-10 w-full rounded-lg bg-[#F0F2F5] py-2 pl-10 pr-3 text-sm text-[#111B21] outline-none placeholder:text-[#667781] focus:ring-2 focus:ring-[#008069]/25"
+            className="h-10 w-full rounded-lg bg-[#F0F2F5] py-2 pl-10 pr-3 text-sm text-[#111B21] outline-none placeholder:text-[#667781] focus:ring-2 focus:ring-[#03442C]/25"
             aria-label="Search conversations"
           />
         </label>
@@ -246,7 +246,7 @@ const RentersListScreen = () => {
                   <div className="flex w-full items-center gap-3 px-3 py-3 transition hover:bg-[#F5F6F6]">
                     <button
                       type="button"
-                      className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-[#008069]/40"
+                      className="shrink-0 rounded-full focus:outline-none focus:ring-2 focus:ring-[#03442C]/40"
                       onClick={(event) => {
                         event.stopPropagation();
                         if (chat.file) {
@@ -291,7 +291,7 @@ const RentersListScreen = () => {
                         ) : null}
                       </div>
                       {chat.email ? (
-                        <p className="mt-0.5 truncate text-xs text-[#008069]">
+                        <p className="mt-0.5 truncate text-xs text-[#03442C]">
                           {chat.email}
                         </p>
                       ) : null}

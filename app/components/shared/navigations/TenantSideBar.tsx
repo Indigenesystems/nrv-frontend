@@ -14,7 +14,6 @@ import {
 } from "react-icons/fi";
 import { PiFileDocDuotone } from "react-icons/pi";
 import Link from "next/link";
-import Image from "next/image";
 import UserAvatar from "@/app/components/shared/UserAvatar";
 import { readStoredUserProfile } from "@/lib/userProfile";
 
@@ -128,14 +127,9 @@ const TenantSideBar: React.FC<TenantSideBarProps> = ({ isOpen }) => {
             }
           }}
         >
-          <Image
-            src="/images/nrvlogo.jpg"
-            alt="NaijaRentVerify"
-            width={150}
-            height={52}
-            className="h-9 w-auto max-w-full object-contain"
-            priority
-          />
+          <span className="text-sm font-bold tracking-wide text-white whitespace-nowrap">
+            NAIJARENTVERIFY
+          </span>
         </div>
 
         {/* Navigation Links */}

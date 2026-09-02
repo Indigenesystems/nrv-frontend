@@ -14,6 +14,7 @@ import Image from "next/image";
 import { Form, Formik, FormikHelpers } from "formik";
 import { AnyAction, ThunkDispatch } from "@reduxjs/toolkit";
 import {
+  addTenancyComment,
   assignDateTenancyTenure,
   endTenancyTenure,
   extendTenancyTenure,
@@ -35,6 +36,7 @@ import {
   Home,
   Mail,
   MapPin,
+  MessageSquare,
   Phone,
   ShieldCheck,
   XCircle,
@@ -122,6 +124,8 @@ const TenantScreen = () => {
   >(null);
   const [statusActionLoading, setStatusActionLoading] = useState(false);
   const [postAcceptPrompt, setPostAcceptPrompt] = useState(false);
+  const [commentText, setCommentText] = useState("");
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
 
   const statusStyles: Record<ApplicationStatus, { bg: string; text: string }> =
     {
@@ -202,6 +206,68 @@ const TenantScreen = () => {
       setSubmitting(false);
       setOpenEndTenancyModal(false);
       await refreshApplication();
+    }
+  };
+
+  const getStoredLandlordId = () => {
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+    try {
+      const raw = localStorage.getItem("nrv-user");
+      if (!raw) {
+        return undefined;
+      }
+      const parsed = JSON.parse(raw);
+      return parsed?.user?._id;
+    } catch {
+      return undefined;
+    }
+  };
+
+  const handleAddTenancyComment = async () => {
+    const text = commentText.trim();
+    if (!text) {
+      toast.error("Enter a comment before saving.");
+      return;
+    }
+    if (text.length > 500) {
+      toast.error("Comment must be 500 characters or fewer.");
+      return;
+    }
+    try {
+      setCommentSubmitting(true);
+      const updated = await dispatch(
+        addTenancyComment({
+          id,
+          comment: text,
+          authorId: getStoredLandlordId(),
+        }) as any,
+      ).unwrap();
+      setApplication((prev: any) => {
+        if (!prev) {
+          return prev;
+        }
+        return {
+          ...prev,
+          tenancyComments:
+            updated?.tenancyComments ?? [
+              ...(prev.tenancyComments || []),
+              { text, createdAt: new Date().toISOString() },
+            ],
+        };
+      });
+      setCommentText("");
+      toast.success("Comment added.");
+      await refreshApplication();
+    } catch (err: any) {
+      const message =
+        err?.message ||
+        err?.payload ||
+        (typeof err === "string" ? err : "Failed to add comment. Please try again.");
+      toast.error(message);
+    } finally {
+      setCommentSubmitting(false);
     }
   };
   
@@ -950,6 +1016,81 @@ const TenantScreen = () => {
                 )}
               </div>
             </div>
+
+            {(isLeaseActive || isLeaseEnded) && (
+              <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <h3 className="flex items-center gap-2 text-base font-semibold text-gray-900">
+                  <MessageSquare className="h-5 w-5 text-nrvPrimaryGreen" />
+                  Comments
+                </h3>
+                <p className="mt-1 text-xs text-gray-500">
+                  Private notes about this tenant. Only you can see these.
+                </p>
+                <div className="mt-4 space-y-3">
+                  {(application?.tenancyComments || []).length === 0 ? (
+                    <p className="rounded-xl border border-dashed border-gray-200 bg-gray-50/70 px-3 py-4 text-sm text-gray-500">
+                      No comments yet.
+                    </p>
+                  ) : (
+                    <ul className="max-h-64 space-y-2 overflow-y-auto">
+                      {[...(application.tenancyComments || [])]
+                        .sort(
+                          (a: any, b: any) =>
+                            new Date(b.createdAt).getTime() -
+                            new Date(a.createdAt).getTime(),
+                        )
+                        .map((entry: any, index: number) => (
+                          <li
+                            key={entry?._id || `${entry?.createdAt}-${index}`}
+                            className="rounded-xl border border-gray-100 bg-gray-50/70 p-3"
+                          >
+                            <p className="whitespace-pre-wrap text-sm text-gray-900">
+                              {entry?.text}
+                            </p>
+                            {entry?.createdAt && (
+                              <p className="mt-1 text-[11px] text-[#667085]">
+                                {format(
+                                  new Date(entry.createdAt),
+                                  "dd MMM yyyy, HH:mm",
+                                )}
+                              </p>
+                            )}
+                          </li>
+                        ))}
+                    </ul>
+                  )}
+                  <div>
+                    <label htmlFor="tenancy-comment" className="sr-only">
+                      Add a comment about this tenant
+                    </label>
+                    <textarea
+                      id="tenancy-comment"
+                      value={commentText}
+                      onChange={(event) => setCommentText(event.target.value)}
+                      maxLength={500}
+                      rows={3}
+                      placeholder="Add a comment about this tenant…"
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-[#03442C]/20"
+                      aria-label="Add a comment about this tenant"
+                    />
+                    <div className="mt-2 flex items-center justify-between gap-3">
+                      <span className="text-[11px] text-gray-400">
+                        {commentText.trim().length}/500
+                      </span>
+                      <Button
+                        type="button"
+                        className="bg-[#03442C] text-white hover:bg-[#023522]"
+                        disabled={commentSubmitting || !commentText.trim()}
+                        onClick={handleAddTenancyComment}
+                        aria-label="Add comment"
+                      >
+                        {commentSubmitting ? "Saving…" : "Add comment"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -968,7 +1109,7 @@ const TenantScreen = () => {
           }
         }}
       >
-        <DialogContent className="max-w-md bg-white sm:rounded-2xl">
+        <DialogContent className="max-w-md sm:rounded-2xl">
           <DialogHeader>
             <DialogTitle className="text-[#03442C]">
               {confirmAction === "Accepted"
@@ -1037,7 +1178,7 @@ const TenantScreen = () => {
           }
         }}
       >
-        <DialogContent className="max-w-md bg-white sm:rounded-2xl">
+        <DialogContent className="max-w-md sm:rounded-2xl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-[#03442C]">
               <CheckCircle2 className="h-5 w-5" aria-hidden />

@@ -435,7 +435,7 @@ const SingleMaintainance = () => {
             )}
 
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
-              <DialogContent className="max-w-md bg-white sm:rounded-2xl">
+              <DialogContent className="max-w-md sm:rounded-2xl">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2 text-[#03442C]">
                     <CheckCircle2 className="h-5 w-5" aria-hidden="true" />

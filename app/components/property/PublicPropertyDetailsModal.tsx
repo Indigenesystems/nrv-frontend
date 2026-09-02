@@ -42,6 +42,7 @@ import {
   isPropertyOccupied,
   normalizeAmenities,
 } from "@/helpers/utils";
+import { cn } from "@/lib/utils";
 
 type RoomResponse = {
   _id: string;
@@ -494,11 +495,20 @@ export function PublicPropertyDetailsModal({
     return "Apply Now";
   }, [accountType]);
 
+  const isCompactView = activeView === "contact" || activeView === "apply";
+
   return (
     <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="fixed left-1/2 top-[3vh] z-50 flex max-h-[94vh] w-[calc(100vw-1rem)] max-w-[min(80rem,calc(100vw-1rem))] -translate-x-1/2 translate-y-0 flex-col gap-0 overflow-y-auto overflow-x-hidden border border-gray-200 bg-gray-50 p-0 shadow-2xl sm:rounded-2xl"
+        className={cn(
+          "fixed left-1/2 z-50 flex flex-col gap-0 overflow-y-auto overflow-x-hidden border border-gray-200 p-0 shadow-2xl sm:rounded-2xl",
+          isCompactView
+            ? "top-1/2 max-h-[90vh] w-[calc(100vw-1.5rem)] -translate-x-1/2 -translate-y-1/2 bg-white"
+            : "top-[3vh] max-h-[94vh] w-[calc(100vw-1rem)] max-w-[min(80rem,calc(100vw-1rem))] -translate-x-1/2 translate-y-0 bg-gray-50",
+          activeView === "contact" && "max-w-md",
+          activeView === "apply" && "max-w-2xl",
+        )}
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
         <div className="p-4 pt-12 md:p-8 md:pt-14 max-w-7xl mx-auto w-full text-[#031B14] pb-6">
@@ -550,15 +560,13 @@ export function PublicPropertyDetailsModal({
               </p>
             </div>
           ) : activeView === "apply" ? (
-            <div className="mx-auto w-full max-w-2xl">
-              <div className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
-                <DialogHeader className="space-y-1 text-left">
-                  <DialogTitle className="text-lg text-gray-900">Apply for this listing</DialogTitle>
-                  <DialogDescription className="text-sm text-gray-600">
-                    Complete your application without leaving this listing.
-                  </DialogDescription>
-                </DialogHeader>
-              </div>
+            <div className="mx-auto w-full">
+              <DialogHeader className="mb-4 space-y-1 text-left">
+                <DialogTitle className="text-lg text-gray-900">Apply for this listing</DialogTitle>
+                <DialogDescription className="text-sm text-gray-600">
+                  Complete your application without leaving this listing.
+                </DialogDescription>
+              </DialogHeader>
               {applyLoading ? (
                 <div className="flex justify-center py-16">
                   <div className="h-10 w-10 animate-spin rounded-full border-b-2 border-nrvPrimaryGreen" />
@@ -584,18 +592,17 @@ export function PublicPropertyDetailsModal({
               )}
             </div>
           ) : activeView === "contact" ? (
-            <div className="mx-auto w-full max-w-md">
-              <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
-                <DialogHeader className="space-y-2 text-left">
-                  <DialogTitle className="flex items-center gap-2 text-gray-900">
-                    <User className="h-5 w-5 text-nrvPrimaryGreen" />
-                    Contact owner
-                  </DialogTitle>
-                  <DialogDescription className="text-left text-gray-600">
-                    Reach out using the details below. You can still submit an application when
-                    you&apos;re ready.
-                  </DialogDescription>
-                </DialogHeader>
+            <div className="mx-auto w-full">
+              <DialogHeader className="space-y-2 text-left">
+                <DialogTitle className="flex items-center gap-2 text-gray-900">
+                  <User className="h-5 w-5 text-nrvPrimaryGreen" />
+                  Contact owner
+                </DialogTitle>
+                <DialogDescription className="text-left text-gray-600">
+                  Reach out using the details below. You can still submit an application when
+                  you&apos;re ready.
+                </DialogDescription>
+              </DialogHeader>
 
                 {contactLoading ? (
                   <div className="flex justify-center py-10">
@@ -652,7 +659,6 @@ export function PublicPropertyDetailsModal({
                     Back to listing
                   </button>
                 </div>
-              </div>
             </div>
           ) : (
             <>

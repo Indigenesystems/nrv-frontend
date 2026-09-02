@@ -752,7 +752,7 @@ const TenantPropertiesScreen = () => {
               setIsOpen(false);
             }}
           >
-            <div className="mx-auto max-w-md rounded-2xl bg-white p-4 sm:p-8">
+            <div className="mx-auto max-w-md p-4 sm:p-8">
               <div className="flex justify-end mb-4">
                 <button
                   onClick={() => {

@@ -105,7 +105,7 @@ const ConversationDetailsScreen: React.FC<ConversationDetailsScreenProps> = ({
                 <div
                   className={`w-fit max-w-xs rounded-lg p-3 shadow-sm ${
                     isSender
-                      ? "bg-[#DCF8C6] text-[#111B21]"
+                      ? "bg-[#E9F4E7] text-[#111B21]"
                       : "bg-white text-[#111B21]"
                   }`}
                   style={{
@@ -132,7 +132,7 @@ const ConversationDetailsScreen: React.FC<ConversationDetailsScreenProps> = ({
                             {showAsImage && (
                               <button
                                 type="button"
-                                className="block overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-[#008069]/40"
+                                className="block overflow-hidden rounded-lg focus:outline-none focus:ring-2 focus:ring-[#03442C]/40"
                                 onClick={() => handleImageClick(file)}
                                 aria-label="View full size image"
                               >
