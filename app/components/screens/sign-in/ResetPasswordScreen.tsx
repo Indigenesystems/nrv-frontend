@@ -173,14 +173,17 @@ const ResetPasswordScreen: React.FC = () => {
       <div className="w-full lg:w-1/2 flex flex-col justify-center flex-1 min-h-0 p-4 sm:p-6 lg:p-8 overflow-y-auto">
         <div className="max-w-md mx-auto w-full min-w-0">
           <div className="lg:hidden flex justify-center mb-6">
-            <Link href="/" className="inline-block">
+            <Link href="/" className="inline-flex items-center gap-2">
               <Image
                 src="/images/nrvlogo.jpg"
-                alt="NaijaRentVerify"
+                alt=""
                 width={200}
                 height={50}
-                className="h-9 sm:h-10 w-auto max-w-[min(240px,88vw)] object-contain"
+                className="h-9 sm:h-10 w-auto max-w-[min(120px,40vw)] object-contain"
               />
+              <span className="text-base font-semibold tracking-tight text-[#03442C] sm:text-lg">
+                NaijaRentVerify
+              </span>
             </Link>
           </div>
 

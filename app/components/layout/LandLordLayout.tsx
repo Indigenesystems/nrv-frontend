@@ -2,34 +2,13 @@
 
 import { useState, useEffect, useMemo } from "react";
 import LandLordSideBar from "../shared/navigations/LandLordSideBar";
-import { FaMessage } from "react-icons/fa6";
-import { RxDashboard } from "react-icons/rx";
-import { IoMdHome } from "react-icons/io";
-import { IoPeopleCircleOutline, IoSettings } from "react-icons/io5";
-import { FiUsers, FiFileText, FiCheck, FiMenu, FiX, FiLogOut, FiHeadphones } from "react-icons/fi";
-import { useRouter, usePathname } from "next/navigation";
-import { LANDLORD_NAV_ITEMS } from "@/app/config/landlordNav";
+import { FiMenu, FiX } from "react-icons/fi";
+import { usePathname } from "next/navigation";
 import { NotificationBell } from "@/app/components/notifications/NotificationBell";
 import { useSessionIdleTimeout } from "@/lib/hooks/useSessionIdleTimeout";
-import { performLogout } from "@/lib/logout";
 import UserAvatar from "@/app/components/shared/UserAvatar";
 import DashboardBackButton from "@/app/components/shared/DashboardBackButton";
 import { readStoredUserProfile } from "@/lib/userProfile";
-
-function getMobileNavIcon(name: string, size: number) {
-  const s = size;
-  switch (name) {
-    case "Dashboard": return <RxDashboard size={s} color="white" />;
-    case "Properties": return <IoMdHome size={s} color="white" />;
-    case "Leads & Applications": return <IoPeopleCircleOutline size={s} color="white" />;
-    case "Tenants": return <FiUsers size={s} color="white" />;
-    case "Tenant Verification": return <FiCheck size={s} color="white" />;
-    case "Maintenance": return <IoSettings size={s} color="white" />;
-    case "Messages": return <FaMessage size={s} color="white" />;
-    case "Buy verification credit": return <FiFileText size={s} color="white" />;
-    default: return <FiFileText size={s} color="white" />;
-  }
-}
 
 interface LandLordLayoutProps {
   children: React.ReactNode;
@@ -48,7 +27,6 @@ const LandLordLayout: React.FC<LandLordLayoutProps> = ({
 }) => {
   useSessionIdleTimeout(true);
   const [user, setUser] = useState<any>(null);
-  const router = useRouter();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -98,17 +76,6 @@ const LandLordLayout: React.FC<LandLordLayoutProps> = ({
     return segments.length > 3;
   }, [pathname]);
 
-  const mobileNavActiveRoute = useMemo(() => {
-    const matches = LANDLORD_NAV_ITEMS.filter(
-      (item) =>
-        pathname === item.route || pathname.startsWith(`${item.route}/`)
-    );
-    if (matches.length === 0) return null;
-    return matches.reduce((a, b) =>
-      a.route.length >= b.route.length ? a : b
-    ).route;
-  }, [pathname]);
-
   return (
     <div className="relative flex h-screen min-h-0 min-w-0 max-w-full flex-col overflow-x-hidden">
       {/* Mobile menu overlay */}
@@ -126,8 +93,7 @@ const LandLordLayout: React.FC<LandLordLayoutProps> = ({
             onClick={() => setMobileMenuOpen(false)}
           />
           <div className="absolute inset-y-0 left-0 flex w-[min(100%,300px)] max-w-full flex-col bg-nrvPrimaryGreen shadow-xl">
-            <div className="flex items-center justify-between border-b border-white/15 px-4 py-3">
-              <span className="text-sm font-semibold text-white">Menu</span>
+            <div className="absolute right-2 top-2 z-10">
               <button
                 type="button"
                 className="rounded-lg p-2 text-white hover:bg-white/10"
@@ -137,89 +103,9 @@ const LandLordLayout: React.FC<LandLordLayoutProps> = ({
                 <FiX size={22} />
               </button>
             </div>
-            <nav className="flex-1 overflow-y-auto py-2">
-              <ul className="space-y-0.5 px-2">
-                {LANDLORD_NAV_ITEMS.map((item) => {
-                  const active = item.route === mobileNavActiveRoute;
-                  return (
-                    <li key={item.route}>
-                      <button
-                        type="button"
-                        className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm touch-manipulation ${
-                          active
-                            ? "bg-white/15 text-[#BBFF37]"
-                            : "text-white/90 hover:bg-white/10"
-                        }`}
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          router.push(item.route);
-                        }}
-                      >
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                          {getMobileNavIcon(item.name, 20)}
-                        </span>
-                        <span>{item.name}</span>
-                      </button>
-                    </li>
-                  );
-                })}
-                <li>
-                  <button
-                    type="button"
-                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm touch-manipulation ${
-                      pathname.startsWith("/dashboard/landlord/support")
-                        ? "bg-white/15 text-[#BBFF37]"
-                        : "text-white/90 hover:bg-white/10"
-                    }`}
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      router.push("/dashboard/landlord/support");
-                    }}
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                      <FiHeadphones size={20} color="white" />
-                    </span>
-                    <span>Contact us</span>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm touch-manipulation ${
-                      pathname.startsWith("/dashboard/landlord/settings")
-                        ? "bg-white/15 text-[#BBFF37]"
-                        : "text-white/90 hover:bg-white/10"
-                    }`}
-                    onClick={() => {
-                      setMobileMenuOpen(false);
-                      router.push("/dashboard/landlord/settings");
-                    }}
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                      <IoSettings size={20} color="white" />
-                    </span>
-                    <span>Settings</span>
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm touch-manipulation text-white/90 hover:bg-white/10"
-                    aria-label="Log out"
-                    onClick={async () => {
-                      setMobileMenuOpen(false);
-                      await performLogout();
-                      router.push("/sign-in");
-                    }}
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center">
-                      <FiLogOut size={20} color="white" />
-                    </span>
-                    <span>Log out</span>
-                  </button>
-                </li>
-              </ul>
-            </nav>
+            <div className="min-h-0 flex-1 overflow-y-auto">
+              <LandLordSideBar isOpen={true} />
+            </div>
           </div>
         </div>
       )}

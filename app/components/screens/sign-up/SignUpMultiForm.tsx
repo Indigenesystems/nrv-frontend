@@ -139,14 +139,20 @@ const SignUpMultiForm = () => {
           <div className="w-full md:w-1/2 flex flex-col items-center justify-center flex-1 min-h-0 bg-gray-50 p-4 sm:p-6 overflow-y-auto">
             <div className="max-w-md w-full min-w-0">
               <div className="md:hidden flex justify-center w-full mb-6 min-w-0">
-                <Link href="/" className="inline-block max-w-full">
+                <Link
+                  href="/"
+                  className="inline-flex max-w-full items-center gap-2"
+                >
                   <Image
                     src="/images/nrvlogo.jpg"
-                    alt="NaijaRentVerify"
+                    alt=""
                     width={200}
                     height={50}
-                    className="h-9 sm:h-10 w-auto max-w-[min(240px,88vw)] object-contain"
+                    className="h-9 sm:h-10 w-auto max-w-[min(120px,40vw)] object-contain"
                   />
+                  <span className="text-base font-semibold tracking-tight text-[#03442C] sm:text-lg">
+                    NaijaRentVerify
+                  </span>
                 </Link>
               </div>
               <h1 className="text-xl sm:text-2xl font-bold text-black">

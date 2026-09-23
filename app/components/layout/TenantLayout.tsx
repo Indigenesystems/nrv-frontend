@@ -151,7 +151,7 @@ const TenantLayout: React.FC<TenantLayoutProps> = ({ children, path, mainPath, s
           />
           <div className="absolute inset-y-0 left-0 flex w-[min(100%,300px)] max-w-full flex-col bg-nrvPrimaryGreen shadow-xl">
             <div className="flex items-center justify-between border-b border-white/15 px-4 py-3">
-              <span className="text-sm font-semibold text-white">Menu</span>
+              <span className="text-sm font-semibold text-white">NaijaRentVerify</span>
               <button
                 type="button"
                 className="rounded-lg p-2 text-white hover:bg-white/10"

@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  SITE_ACCESS_COOKIE,
+  SITE_ACCESS_COOKIE_VALUE,
+} from "@/lib/landing-access-codes";
 
 const ROLE_COOKIE = "nrv_role";
 
@@ -17,6 +21,20 @@ export function middleware(request: NextRequest) {
     (pathname.includes("react-toastify") || pathname.includes("ReactToastify"))
   ) {
     return new NextResponse(null, { status: 204 });
+  }
+
+  const hasSiteAccess =
+    request.cookies.get(SITE_ACCESS_COOKIE)?.value === SITE_ACCESS_COOKIE_VALUE;
+
+  // Soft site gate: block direct URL entry until access code unlocks a cookie.
+  if (!hasSiteAccess && pathname !== "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
+    url.search = "";
+    if (pathname !== "/") {
+      url.searchParams.set("next", pathname);
+    }
+    return NextResponse.redirect(url);
   }
 
   const role = request.cookies.get(ROLE_COOKIE)?.value;
@@ -40,8 +58,9 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/onboard/:path*",
-    "/.well-known/appspecific/com.chrome.devtools.json",
+    /*
+     * Match all paths except static assets and Next internals.
+     */
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)",
   ],
 };
