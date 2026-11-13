@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
 import "../globals.css";
 import "react-toastify/dist/ReactToastify.css";
 import { Providers } from "./providers";
@@ -7,12 +6,6 @@ import { ToastContainer } from "react-toastify";
 import { RememberMeBootstrap } from "./components/auth/RememberMeBootstrap";
 import DataUseNotice from "./components/shared/DataUseNotice";
 import { SITE_NAME, SITE_URL } from "@/lib/seo";
-
-const jakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -48,7 +41,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
-      <body className={jakarta.className} suppressHydrationWarning>
+      <body suppressHydrationWarning>
         <Providers>
           <RememberMeBootstrap>
             <div className="min-h-screen">{children}</div>
