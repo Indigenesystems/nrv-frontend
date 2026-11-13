@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect } from "react";
-import { DOJAH_APP_ID, DOJAH_WIDGET_ID } from "@/lib/dojahWidget";
+import {
+  DOJAH_APP_ID,
+  DOJAH_PUBLIC_KEY,
+  DOJAH_WIDGET_ID,
+} from "@/lib/dojahWidget";
 
 type DojahWidgetConfig = {
   appId?: string;
@@ -12,6 +16,7 @@ type DojahWidgetConfig = {
   firstName?: string;
   lastName?: string;
   email?: string;
+  nin?: string;
 };
 
 type DojahLivenessWidgetProps = {
@@ -76,13 +81,14 @@ export default function DojahLivenessWidget({
   listeners.onError = onError;
 
   const appId = widget.appId || DOJAH_APP_ID;
-  const publicKey = widget.publicKey;
+  const publicKey = widget.publicKey || DOJAH_PUBLIC_KEY;
   const widgetId = widget.widgetId || DOJAH_WIDGET_ID;
   const type = widgetId ? "custom" : widget.type || "liveness";
   const referenceId = widget.referenceId;
   const firstName = widget.firstName;
   const lastName = widget.lastName;
   const email = widget.email;
+  const nin = widget.nin;
 
   useEffect(() => {
     if (!appId || !publicKey || !referenceId) {
@@ -136,6 +142,9 @@ export default function DojahLivenessWidget({
             ...(email ? { email } : {}),
           };
         }
+        if (nin) {
+          options.gov_data = { nin };
+        }
         const connect = new window.Connect(options);
         connect.setup();
         connect.open();
@@ -151,7 +160,7 @@ export default function DojahLivenessWidget({
     return () => {
       cancelled = true;
     };
-  }, [appId, publicKey, widgetId, type, referenceId, firstName, lastName, email]);
+  }, [appId, publicKey, widgetId, type, referenceId, firstName, lastName, email, nin]);
 
   return (
     <p className="text-sm text-gray-600">

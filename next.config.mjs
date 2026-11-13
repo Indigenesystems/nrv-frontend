@@ -8,7 +8,7 @@ const nextConfig = {
             {
               key: "Permissions-Policy",
               value:
-                'camera=(self "https://identity.dojah.io"), geolocation=(self "https://identity.dojah.io")',
+                'camera=(self "https://identity.dojah.io" "https://widget.dojah.io"), microphone=(self "https://identity.dojah.io" "https://widget.dojah.io"), geolocation=(self "https://identity.dojah.io" "https://widget.dojah.io")',
             },
           ],
         },
