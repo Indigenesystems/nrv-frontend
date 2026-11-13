@@ -10,6 +10,7 @@ import {
   consentGuestInvite,
   fetchGuestInvite,
 } from "@/lib/guestVerificationApi";
+import { DOJAH_APP_ID, DOJAH_PUBLIC_KEY } from "@/lib/dojahWidget";
 
 type Invite = {
   guestName?: string;
@@ -42,7 +43,11 @@ export default function GuestCheckPage() {
   const [busy, setBusy] = useState(false);
   const [livenessOpen, setLivenessOpen] = useState(false);
 
-  const widgetReady = Boolean(invite?.widget?.configured);
+  const widgetReady = Boolean(
+    invite?.widget?.configured ||
+      invite?.widget?.appId ||
+      (DOJAH_APP_ID && DOJAH_PUBLIC_KEY),
+  );
 
   useEffect(() => {
     if (!token) {
@@ -200,7 +205,7 @@ export default function GuestCheckPage() {
                   </button>
                 ) : (
                   <DojahLivenessWidget
-                    widget={invite.widget || {}}
+                    widget={{ ...(invite.widget || {}), nin }}
                     onSuccess={(payload) => {
                       setError("");
                       void finish({
