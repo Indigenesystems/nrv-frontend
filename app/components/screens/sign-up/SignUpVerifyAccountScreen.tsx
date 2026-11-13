@@ -86,6 +86,8 @@ const SignUpVerifyAccount: React.FC<SignUpVerifyAccountProps> = ({
           router.push("/dashboard/tenant");
         } else if (accountType === "landlord") {
           router.push("/dashboard/landlord");
+        } else if (accountType === "shortlet_manager") {
+          router.push("/dashboard/manager");
         } else {
           router.push("/");
         }
@@ -96,6 +98,11 @@ const SignUpVerifyAccount: React.FC<SignUpVerifyAccountProps> = ({
       if (accountType === "tenant") {
         toast.success("Account verified. Welcome to NaijaRentVerify!");
         router.push("/dashboard/tenant");
+        return;
+      }
+      if (accountType === "shortlet_manager") {
+        toast.success("Account verified. Welcome to NaijaRentVerify!");
+        router.push("/dashboard/manager");
         return;
       }
 

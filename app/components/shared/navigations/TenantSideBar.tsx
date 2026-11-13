@@ -41,11 +41,6 @@ const links = [
     icon: <FiHome />,
   },
   {
-    name: "Short stays",
-    route: "/dashboard/tenant/short-stays",
-    icon: <FiHome />,
-  },
-  {
     name: "Applications",
     route: "/dashboard/tenant/properties/applications",
     icon: <PiFileDocDuotone />,

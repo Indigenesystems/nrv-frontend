@@ -13,6 +13,9 @@ const formatAccountType = (accountType?: string | null): string | null => {
   if (accountType === "tenant") {
     return "Tenant";
   }
+  if (accountType === "shortlet_manager") {
+    return "Shortlet Manager";
+  }
   return accountType;
 };
 

@@ -22,7 +22,7 @@ const NavBar: React.FC = () => {
 
   return (
     <div
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-[130] transition-all duration-300 ${
         scrolled
           ? "bg-white shadow-[0_1px_3px_rgba(0,0,0,0.08)] border-b border-gray-100"
           : "bg-white"

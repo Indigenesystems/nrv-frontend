@@ -10,7 +10,7 @@ import SignUppVerifyAccountScreen from "./SignUpVerifyAccountScreen";
 import Button from "@/app/components/shared/buttons/Button";
 import CheckBox from "@/app/components/shared/input-fields/CheckBox";
 import InputField from "@/app/components/shared/input-fields/InputFields";
-import { CheckCircle, Smile, User } from "lucide-react";
+import { CheckCircle, Home, Smile, User } from "lucide-react";
 import { toast } from "react-toastify";
 import AccountSideBar from "./AccountSideBar";
 import AccountTypeBadge from "./AccountTypeBadge";
@@ -107,7 +107,11 @@ const SignUpMultiForm = () => {
     const roleParam = searchParams.get("role");
     const phoneParam = searchParams.get("phone");
 
-    if (roleParam === "landlord" || roleParam === "tenant") {
+    if (
+      roleParam === "landlord" ||
+      roleParam === "tenant" ||
+      roleParam === "shortlet_manager"
+    ) {
       setSelectedRole(roleParam);
       if (phoneParam) setPrefillPhone(phoneParam);
       setCurrentStep(2);
@@ -171,6 +175,13 @@ const SignUpMultiForm = () => {
                     text: "Sign Up as a Tenant",
                     description:
                       "Find and secure your dream home with genuine listings.",
+                  },
+                  {
+                    role: "shortlet_manager",
+                    icon: <Home className="text-green-700" />,
+                    text: "Sign Up as a Shortlet Manager",
+                    description:
+                      "Confirm guest identity before check-in.",
                   },
                 ].map(({ role, icon, text, description }) => (
                   <div
@@ -283,7 +294,10 @@ const SignUpMultiForm = () => {
                     "lastName",
                     "email",
                     "phoneNumber",
-                    ...(selectedRole === "landlord" ? (["nin"] as const) : []),
+                    ...(selectedRole === "landlord" ||
+                    selectedRole === "shortlet_manager"
+                      ? (["nin"] as const)
+                      : []),
                     "password",
                     "confirmPassword",
                   ] as const;

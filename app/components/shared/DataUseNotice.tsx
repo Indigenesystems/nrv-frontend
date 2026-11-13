@@ -21,7 +21,11 @@ const isPolicyRoute = (pathname: string | null) => {
   if (!pathname) {
     return false;
   }
-  return pathname === "/privacy" || pathname.startsWith("/legal");
+  return (
+    pathname === "/privacy" ||
+    pathname.startsWith("/legal") ||
+    pathname.startsWith("/guest-check")
+  );
 };
 
 const DataUseNotice = () => {

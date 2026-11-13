@@ -16,6 +16,7 @@ import {
   shortStayTitle,
 } from "@/lib/shortStay";
 import { normalizeAmenities } from "@/helpers/utils";
+import { getStoredSession } from "@/lib/authSession";
 
 const SAMPLE_NIGHTS = 7;
 
@@ -210,6 +211,8 @@ function BookingCard({
   onCheckIn,
   onCheckOut,
   onGuests,
+  guest,
+  onGuest,
   onReserve,
 }: {
   nightly: number;
@@ -224,6 +227,14 @@ function BookingCard({
   onCheckIn: (value: string) => void;
   onCheckOut: (value: string) => void;
   onGuests: (value: number) => void;
+  guest: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+    nin: string;
+  };
+  onGuest: (field: string, value: string) => void;
   onReserve: () => void;
 }) {
   const displayNights = nights > 0 ? nights : SAMPLE_NIGHTS;
@@ -274,6 +285,40 @@ function BookingCard({
           </select>
         </label>
       </div>
+      <div className="mt-4 grid grid-cols-1 gap-2">
+        <input
+          value={guest.firstName}
+          onChange={(event) => onGuest("firstName", event.target.value)}
+          placeholder="First name"
+          className="rounded-lg border border-[#B0B0B0] px-3 py-2 text-sm text-[#222] outline-none"
+        />
+        <input
+          value={guest.lastName}
+          onChange={(event) => onGuest("lastName", event.target.value)}
+          placeholder="Last name"
+          className="rounded-lg border border-[#B0B0B0] px-3 py-2 text-sm text-[#222] outline-none"
+        />
+        <input
+          type="email"
+          value={guest.email}
+          onChange={(event) => onGuest("email", event.target.value)}
+          placeholder="Email"
+          className="rounded-lg border border-[#B0B0B0] px-3 py-2 text-sm text-[#222] outline-none"
+        />
+        <input
+          value={guest.phone}
+          onChange={(event) => onGuest("phone", event.target.value)}
+          placeholder="Phone"
+          className="rounded-lg border border-[#B0B0B0] px-3 py-2 text-sm text-[#222] outline-none"
+        />
+        <input
+          value={guest.nin}
+          onChange={(event) => onGuest("nin", event.target.value.replace(/\D/g, "").slice(0, 11))}
+          placeholder="NIN (11 digits)"
+          inputMode="numeric"
+          className="rounded-lg border border-[#B0B0B0] px-3 py-2 text-sm text-[#222] outline-none"
+        />
+      </div>
       <button
         type="button"
         disabled={submitting || nights < minimumNights}
@@ -283,7 +328,7 @@ function BookingCard({
         {submitting ? "Sending request" : "Reserve"}
       </button>
       <p className="mt-3 text-center text-[12px] text-[#6A6A6A]">
-        You will not be charged until the owner accepts.
+        You will not be charged until the host confirms your identity.
       </p>
     </div>
   );
@@ -299,6 +344,13 @@ export default function ShortStayDetail({ roomId }: { roomId: string }) {
   const [guests, setGuests] = useState(1);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [guest, setGuest] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    nin: "",
+  });
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [monthCursor, setMonthCursor] = useState(() => {
     const now = new Date();
@@ -335,6 +387,29 @@ export default function ShortStayDetail({ roomId }: { roomId: string }) {
     void load();
   }, [roomId]);
 
+  useEffect(() => {
+    const session = getStoredSession();
+    const user = session?.user as
+      | {
+          firstName?: string;
+          lastName?: string;
+          email?: string;
+          phoneNumber?: string;
+          nin?: string;
+        }
+      | undefined;
+    if (!user) {
+      return;
+    }
+    setGuest((prev) => ({
+      firstName: prev.firstName || String(user.firstName || ""),
+      lastName: prev.lastName || String(user.lastName || ""),
+      email: prev.email || String(user.email || ""),
+      phone: prev.phone || String(user.phoneNumber || ""),
+      nin: prev.nin || String(user.nin || "").replace(/\D/g, "").slice(0, 11),
+    }));
+  }, []);
+
   const nights = useMemo(
     () => nightsBetween(checkIn, checkOut),
     [checkIn, checkOut],
@@ -366,18 +441,19 @@ export default function ShortStayDetail({ roomId }: { roomId: string }) {
   };
 
   const handleRequest = async () => {
-    let session: any = null;
-    try {
-      session = JSON.parse(localStorage.getItem("nrv-user") || "null");
-    } catch {
-      session = null;
-    }
-    if (!session?.accessToken) {
-      router.push(`/sign-in?next=/short-stays/${roomId}`);
-      return;
-    }
     if (nights < minimumNights) {
       toast.error(`This stay requires at least ${minimumNights} nights.`);
+      return;
+    }
+    const nin = guest.nin.replace(/\D/g, "");
+    if (
+      !guest.firstName.trim() ||
+      !guest.lastName.trim() ||
+      !guest.email.trim() ||
+      !guest.phone.trim() ||
+      nin.length !== 11
+    ) {
+      toast.error("Enter your name, email, phone, and 11-digit NIN.");
       return;
     }
     setSubmitting(true);
@@ -386,9 +462,20 @@ export default function ShortStayDetail({ roomId }: { roomId: string }) {
         roomId,
         checkIn,
         checkOut,
+        firstName: guest.firstName.trim(),
+        lastName: guest.lastName.trim(),
+        guestEmail: guest.email.trim(),
+        guestPhone: guest.phone.trim(),
+        guestNin: nin,
       });
-      toast.success(result?.message || "Request sent.");
-      router.push("/dashboard/tenant/short-stays");
+      toast.success(
+        result?.message ||
+          "Request sent. The host will run a guest identity check before payment.",
+      );
+      const session = getStoredSession();
+      if (session?.accessToken) {
+        router.push("/dashboard/tenant/short-stays");
+      }
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message || "Could not send this request.",
@@ -434,6 +521,9 @@ export default function ShortStayDetail({ roomId }: { roomId: string }) {
     onCheckIn: setCheckIn,
     onCheckOut: setCheckOut,
     onGuests: setGuests,
+    guest,
+    onGuest: (field: string, value: string) =>
+      setGuest((prev) => ({ ...prev, [field]: value })),
     onReserve: handleRequest,
   };
 

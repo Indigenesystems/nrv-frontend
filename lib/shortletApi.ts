@@ -57,6 +57,12 @@ export const createShortStayBooking = async (body: {
   roomId: string;
   checkIn: string;
   checkOut: string;
+  guestName?: string;
+  guestEmail?: string;
+  guestPhone?: string;
+  guestNin?: string;
+  firstName?: string;
+  lastName?: string;
 }) => {
   const response = await axios.post(`${API_URL}/shortlets/bookings`, body, {
     headers: authHeader(),
@@ -97,10 +103,32 @@ export const declineShortStayBooking = async (id: string) => {
   return response.data;
 };
 
-export const payShortStayBooking = async (bookingId: string) => {
+export const runShortStayIdentityCheck = async (id: string) => {
+  const response = await axios.post(
+    `${API_URL}/shortlets/bookings/${id}/identity-check`,
+    {},
+    { headers: authHeader() },
+  );
+  return response.data;
+};
+
+export const fetchShortStayPayBooking = async (
+  id: string,
+  token: string,
+) => {
+  const response = await axios.get(`${API_URL}/shortlets/bookings/pay/${id}`, {
+    params: { token },
+  });
+  return response.data?.data;
+};
+
+export const payShortStayBooking = async (
+  bookingId: string,
+  guestPayToken?: string,
+) => {
   const response = await axios.post(
     `${API_URL}/payments/initialize-shortlet`,
-    { bookingId },
+    { bookingId, guestPayToken },
     { headers: authHeader() },
   );
   return response.data;

@@ -5,9 +5,8 @@ import { ROUTES } from "../constants";
 import {
   getAccountBlockedMessage,
   isAccountLoginBlocked,
-  isLandlordAccount,
   isPathAllowedForRole,
-  isTenantAccount,
+  resolveNrvRole,
   setRoleCookie,
   type NrvRole,
 } from "@/lib/authSession";
@@ -33,11 +32,7 @@ export const useAuthRedirect = () => {
       return;
     }
 
-    const role: NrvRole | null = isTenantAccount(userAccountType)
-      ? "tenant"
-      : isLandlordAccount(userAccountType)
-        ? "landlord"
-        : null;
+    const role: NrvRole | null = resolveNrvRole(userAccountType);
 
     if (role) {
       setRoleCookie(role);
@@ -99,8 +94,10 @@ export const useAuthRedirect = () => {
         case "tenant":
           router.push(ROUTES.TENANT_DASHBOARD);
           break;
+        case "shortlet_manager":
+          router.push(ROUTES.MANAGER_DASHBOARD);
+          break;
         default:
-          // Fallback to home page for unknown account types
           router.push(ROUTES.HOME);
           break;
       }

@@ -15,6 +15,7 @@ import {
   isAccessTokenExpired,
   isAccountLoginBlocked,
   isLandlordAccount,
+  isShortletManagerAccount,
   isTenantAccount,
   sessionRequiresPasswordChange,
   syncRoleCookieFromSession,
@@ -47,7 +48,7 @@ const TenantProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
       );
     };
 
-    const sendToRoleHome = (role: "landlord" | "tenant") => {
+    const sendToRoleHome = (role: "landlord" | "tenant" | "shortlet_manager") => {
       const home = getDashboardHomeForRole(role);
       if (pathname === home || pathname.startsWith(`${home}/`)) {
         return;
@@ -103,6 +104,13 @@ const TenantProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
         if (!cancelled) {
           setAllowed(false);
           sendToRoleHome("landlord");
+        }
+        return;
+      }
+      if (isShortletManagerAccount(accountType)) {
+        if (!cancelled) {
+          setAllowed(false);
+          sendToRoleHome("shortlet_manager");
         }
         return;
       }

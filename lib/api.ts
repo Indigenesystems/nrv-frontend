@@ -102,7 +102,8 @@ const attachAuthResponseInterceptor = (client: AxiosInstance) => {
         error.response?.status !== 401 ||
         !originalRequest ||
         originalRequest._retryRememberMe ||
-        shouldBypassAuth(requestUrl)
+        shouldBypassAuth(requestUrl) ||
+        requestUrl.includes('/notifications')
       ) {
         if (error.response?.status === 403) {
           console.error('Access forbidden');

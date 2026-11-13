@@ -1,5 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    async headers() {
+      return [
+        {
+          source: "/guest-check/:path*",
+          headers: [
+            {
+              key: "Permissions-Policy",
+              value:
+                'camera=(self "https://identity.dojah.io"), geolocation=(self "https://identity.dojah.io")',
+            },
+          ],
+        },
+      ];
+    },
     async redirects() {
       return [
         { source: "/legal", destination: "/legal/terms", permanent: true },
@@ -7,6 +21,11 @@ const nextConfig = {
         {
           source: "/r/:id",
           destination: "/dashboard/tenant/verification?verificationId=:id",
+          permanent: false,
+        },
+        {
+          source: "/dashboard/manager/requests/new",
+          destination: "/dashboard/manager/requests",
           permanent: false,
         },
       ];

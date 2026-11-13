@@ -5,6 +5,7 @@ const PUBLIC_PATHS = [
   "/",
   "/listings",
   "/short-stays",
+  "/sign-up",
   "/about-us",
   "/careers",
   "/contact-us",

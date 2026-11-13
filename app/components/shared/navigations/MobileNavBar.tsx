@@ -6,6 +6,10 @@ import NavLink from "./NavLink";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import {
+  getDashboardHrefForAccount,
+  getStoredSession,
+} from "@/lib/authSession";
 
 type NavItem =
   | { text: string; targetId: string }
@@ -16,30 +20,41 @@ const navItems: NavItem[] = [
   { text: "How It Works", targetId: "how-it-works" },
   { text: "Features", targetId: "features" },
   { text: "Explore Homes", targetId: "explore" },
-  { text: "Short stays", route: "/short-stays" },
+  { text: "Verify guests", route: "/short-stays" },
   { text: "Testimonials", targetId: "testimonials" },
 ];
 
 const MobileNavBar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [currentUser, setCurrentUser] = useState<{ accountType?: string } | null>(null);
+  const [dashboardHref, setDashboardHref] = useState<string | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    try {
-      const userData = localStorage.getItem("nrv-user");
-      if (userData) {
-        const parsed = JSON.parse(userData);
-        if (parsed?.user) {
+    const load = () => {
+      try {
+        const session = getStoredSession();
+        if (session?.user) {
           setIsLoggedIn(true);
-          setCurrentUser(parsed.user);
+          setDashboardHref(
+            getDashboardHrefForAccount(session.user.accountType) ?? "/sign-in",
+          );
+          return;
         }
+      } catch {
+        localStorage.removeItem("nrv-user");
       }
-    } catch {
-      localStorage.removeItem("nrv-user");
-    }
+      setIsLoggedIn(false);
+      setDashboardHref(null);
+    };
+    load();
+    window.addEventListener("nrv-user-updated", load);
+    window.addEventListener("storage", load);
+    return () => {
+      window.removeEventListener("nrv-user-updated", load);
+      window.removeEventListener("storage", load);
+    };
   }, []);
 
   const close = () => setIsOpen(false);
@@ -68,14 +83,25 @@ const MobileNavBar: React.FC = () => {
             NAIJARENTVERIFY
           </span>
         </Link>
-        <button
-          type="button"
-          onClick={() => setIsOpen(!isOpen)}
-          className="p-2.5 rounded-xl text-gray-600 hover:bg-[#03442C]/5 hover:text-[#03442C] transition-all duration-200"
-          aria-label={isOpen ? "Close menu" : "Open menu"}
-        >
-          {isOpen ? <X size={24} /> : <Menu size={22} />}
-        </button>
+        <div className="flex items-center gap-1.5 shrink-0">
+          {isLoggedIn && dashboardHref ? (
+            <Link
+              href={dashboardHref}
+              className="inline-flex items-center gap-1 px-3 py-2 rounded-full bg-[#03442C] text-white text-xs font-semibold"
+            >
+              Dashboard
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-2.5 rounded-xl text-gray-600 hover:bg-[#03442C]/5 hover:text-[#03442C] transition-all duration-200"
+            aria-label={isOpen ? "Close menu" : "Open menu"}
+          >
+            {isOpen ? <X size={24} /> : <Menu size={22} />}
+          </button>
+        </div>
       </header>
 
       {/* Full-screen overlay menu */}
@@ -127,19 +153,15 @@ const MobileNavBar: React.FC = () => {
             </ul>
 
             <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col gap-3">
-              {isLoggedIn ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    close();
-                    if (currentUser?.accountType === "landlord") router.push("/dashboard/landlord");
-                    else if (currentUser?.accountType === "tenant") router.push("/dashboard/tenant");
-                  }}
+              {isLoggedIn && dashboardHref ? (
+                <Link
+                  href={dashboardHref}
+                  onClick={close}
                   className="w-full py-4 rounded-xl bg-[#03442C] text-white font-semibold hover:bg-[#022f21] transition-all duration-200 flex items-center justify-center gap-2"
                 >
                   Dashboard
                   <ArrowRight className="w-4 h-4" />
-                </button>
+                </Link>
               ) : (
                 <>
                   <button

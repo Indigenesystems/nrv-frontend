@@ -18,7 +18,7 @@ export type NrvSession = {
   user?: NrvSessionUser;
 };
 
-export type NrvRole = "landlord" | "tenant";
+export type NrvRole = "landlord" | "tenant" | "shortlet_manager";
 
 export const getStoredSession = (): NrvSession | null => {
   if (typeof window === "undefined") {
@@ -88,6 +88,13 @@ export const isTenantAccount = (accountType?: string | null): boolean =>
     .trim()
     .toLowerCase() === "tenant";
 
+export const isShortletManagerAccount = (
+  accountType?: string | null,
+): boolean =>
+  String(accountType || "")
+    .trim()
+    .toLowerCase() === "shortlet_manager";
+
 /** Landlord-invited accounts must set a new password before using the app. */
 export const sessionRequiresPasswordChange = (
   session?: NrvSession | null,
@@ -124,6 +131,9 @@ export const resolveNrvRole = (
   }
   if (isLandlordAccount(accountType)) {
     return "landlord";
+  }
+  if (isShortletManagerAccount(accountType)) {
+    return "shortlet_manager";
   }
   return null;
 };
@@ -166,8 +176,19 @@ export const syncRoleCookieFromSession = (
   return role;
 };
 
-export const getDashboardHomeForRole = (role: NrvRole): string =>
-  role === "tenant" ? "/dashboard/tenant" : "/dashboard/landlord";
+export const getDashboardHomeForRole = (role: NrvRole): string => {
+  if (role === "tenant") return "/dashboard/tenant";
+  if (role === "shortlet_manager") return "/dashboard/manager";
+  return "/dashboard/landlord";
+};
+
+/** Public-nav Dashboard destination, including landlord aliases like "Property Owner". */
+export const getDashboardHrefForAccount = (
+  accountType?: string | null,
+): string | null => {
+  const role = resolveNrvRole(accountType);
+  return role ? getDashboardHomeForRole(role) : null;
+};
 
 export const isPathAllowedForRole = (
   pathname: string,
@@ -178,6 +199,9 @@ export const isPathAllowedForRole = (
       pathname.startsWith("/dashboard/tenant") ||
       pathname.startsWith("/onboard/tenant")
     );
+  }
+  if (role === "shortlet_manager") {
+    return pathname.startsWith("/dashboard/manager");
   }
   return (
     pathname.startsWith("/dashboard/landlord") ||

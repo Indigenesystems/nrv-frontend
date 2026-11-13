@@ -1,14 +1,12 @@
-import HomePageLayout from "@/app/components/layout/HomePageLayout";
-import ShortStayDetail from "@/app/components/short-stays/ShortStayDetail";
+"use client";
 
-export default function ShortStayDetailPage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  return (
-    <HomePageLayout showFooter={false}>
-      <ShortStayDetail roomId={params.id} />
-    </HomePageLayout>
-  );
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
+export default function RetiredShortStayDetailPage() {
+  const router = useRouter();
+  useEffect(() => {
+    router.replace("/short-stays");
+  }, [router]);
+  return null;
 }

@@ -36,7 +36,6 @@ interface LandLordSideBarProps {
 const ICONS: Record<string, React.ReactNode> = {
   "Dashboard": <FiHome />,
   "Properties": <FiClipboard />,
-  "Short stays": <FiHome />,
   "Leads & Applications": <FiFileText />,
   "Tenants": <FiUsers />,
   "Tenant Verification": <FiDollarSign />,

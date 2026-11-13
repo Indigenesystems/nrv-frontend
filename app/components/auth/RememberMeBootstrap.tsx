@@ -39,6 +39,9 @@ export function RememberMeBootstrap({ children }: { children: React.ReactNode })
         if (cancelled || !session?.accessToken) {
           return;
         }
+        if (pathname.startsWith("/guest-check")) {
+          return;
+        }
 
         const role = resolveNrvRole(session.user?.accountType);
         if (!role) {

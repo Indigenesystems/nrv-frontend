@@ -45,13 +45,17 @@ export function middleware(request: NextRequest) {
   const isTenantPath =
     pathname.startsWith("/dashboard/tenant") ||
     pathname.startsWith("/onboard/tenant");
+  const isManagerPath = pathname.startsWith("/dashboard/manager");
 
   // Enforce role cookie when present (set on login / session restore).
-  if (role === "tenant" && isLandlordPath) {
+  if (role === "tenant" && (isLandlordPath || isManagerPath)) {
     return NextResponse.redirect(new URL("/dashboard/tenant", request.url));
   }
-  if (role === "landlord" && isTenantPath) {
+  if (role === "landlord" && (isTenantPath || isManagerPath)) {
     return NextResponse.redirect(new URL("/dashboard/landlord", request.url));
+  }
+  if (role === "shortlet_manager" && (isLandlordPath || isTenantPath)) {
+    return NextResponse.redirect(new URL("/dashboard/manager", request.url));
   }
 
   return NextResponse.next();

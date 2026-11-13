@@ -83,6 +83,9 @@ function hrefForNotification(n: AppNotification): string | null {
   }
 
   if (type === "payment_success" || type === "payment_failed") {
+    if (n.targetRole === "shortlet_manager") {
+      return "/dashboard/manager/credits";
+    }
     return "/dashboard/landlord/settings/plans";
   }
 

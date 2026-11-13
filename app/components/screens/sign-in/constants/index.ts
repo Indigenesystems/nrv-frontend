@@ -6,6 +6,7 @@ export const ROUTES = {
   SET_PASSWORD: "/set-password",
   LANDLORD_DASHBOARD: "/dashboard/landlord",
   TENANT_DASHBOARD: "/dashboard/tenant",
+  MANAGER_DASHBOARD: "/dashboard/manager",
 } as const;
 
 export const VALIDATION_MESSAGES = {

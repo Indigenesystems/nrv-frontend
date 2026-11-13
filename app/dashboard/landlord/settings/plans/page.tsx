@@ -185,7 +185,14 @@ const PaymentHistoryList = ({
 const PlansPage = () => {
   const dispatch = useDispatch();
   const searchParams = useSearchParams();
-  const { plans, loading } = useSelector((state: RootState) => state.plans);
+  const { plans: allPlans, loading } = useSelector((state: RootState) => state.plans);
+  const plans = useMemo(
+    () =>
+      (Array.isArray(allPlans) ? allPlans : []).filter(
+        (plan: any) => plan?.slug !== "shortlet",
+      ),
+    [allPlans],
+  );
   const user = useSelector((state: RootState) => state.user.data);
   const [purchasingPlanId, setPurchasingPlanId] = useState<string | null>(null);
   const [quantityByPlanId, setQuantityByPlanId] = useState<Record<string, number>>({});
@@ -216,12 +223,12 @@ const PlansPage = () => {
     if (userDoc && (userDoc as { _id?: string })?._id) {
       return getVerificationCreditBalances(userDoc);
     }
-    if (typeof window === "undefined") return { standard: 0, premium: 0 };
+    if (typeof window === "undefined") return { standard: 0, premium: 0, shortlet: 0 };
     try {
       const raw = localStorage.getItem("nrv-user");
       return getVerificationCreditBalances(raw ? JSON.parse(raw)?.user : null);
     } catch {
-      return { standard: 0, premium: 0 };
+      return { standard: 0, premium: 0, shortlet: 0 };
     }
   }, [user, userDoc]);
 

@@ -8,6 +8,15 @@ import axios from "axios";
 import { API_URL, LANDLORD_VERIFICATION_REQUEST_PATH } from "@/config/constant";
 import { toast } from "react-toastify";
 import { setUserFromPayment } from "@/redux/slices/userSlice";
+import {
+  getSessionAccountType,
+  isShortletManagerAccount,
+} from "@/lib/authSession";
+
+const creditsHome = () =>
+  isShortletManagerAccount(getSessionAccountType())
+    ? "/dashboard/manager/credits"
+    : "/dashboard/landlord/settings/plans";
 
 type CallbackState = "verifying" | "success" | "incomplete" | "error";
 
@@ -38,7 +47,7 @@ export default function PaymentCallbackPage() {
   const handleContinuePayment = async () => {
     const userId = getStoredUserId();
     if (!reference || !userId) {
-      router.push("/dashboard/landlord/settings/plans");
+      router.push(creditsHome());
       return;
     }
 
@@ -54,14 +63,14 @@ export default function PaymentCallbackPage() {
         return;
       }
       toast.error(res.data?.message || "Could not resume payment.");
-      router.push("/dashboard/landlord/settings/plans");
+      router.push(creditsHome());
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message ||
           err?.message ||
           "Could not resume payment.",
       );
-      router.push("/dashboard/landlord/settings/plans");
+      router.push(creditsHome());
     } finally {
       setResuming(false);
     }
@@ -147,18 +156,21 @@ export default function PaymentCallbackPage() {
               Payment successful
             </h1>
             <p className="text-gray-600 mb-6 text-sm leading-relaxed">
-              Your verification credits are on your account. You can start a tenant
-              verification right away.
+              {isShortletManagerAccount(getSessionAccountType())
+                ? "Your shortlet identity credits are on your account."
+                : "Your verification credits are on your account. You can start a tenant verification right away."}
             </p>
             <div className="flex flex-col gap-3">
+              {isShortletManagerAccount(getSessionAccountType()) ? null : (
+                <Link
+                  href={verificationUrl}
+                  className="inline-flex items-center justify-center rounded-xl bg-[#03442C] text-white font-semibold py-3 px-4 hover:bg-[#022f21] transition-colors"
+                >
+                  Start verification
+                </Link>
+              )}
               <Link
-                href={verificationUrl}
-                className="inline-flex items-center justify-center rounded-xl bg-[#03442C] text-white font-semibold py-3 px-4 hover:bg-[#022f21] transition-colors"
-              >
-                Start verification
-              </Link>
-              <Link
-                href="/dashboard/landlord/settings/plans"
+                href={creditsHome()}
                 className="inline-flex items-center justify-center rounded-xl border border-gray-200 text-gray-800 font-medium py-3 px-4 hover:bg-gray-50 transition-colors text-sm"
               >
                 Back to credits
@@ -184,7 +196,7 @@ export default function PaymentCallbackPage() {
                 {resuming ? "Opening checkout…" : "Continue payment"}
               </button>
               <Link
-                href="/dashboard/landlord/settings/plans"
+                href={creditsHome()}
                 className="inline-flex items-center justify-center rounded-xl border border-gray-200 text-gray-800 font-medium py-3 px-4 hover:bg-gray-50 transition-colors text-sm"
               >
                 Back to credits
@@ -202,7 +214,7 @@ export default function PaymentCallbackPage() {
             </p>
             <button
               type="button"
-              onClick={() => router.push("/dashboard/landlord/settings/plans")}
+              onClick={() => router.push(creditsHome())}
               className="w-full rounded-xl bg-[#03442C] text-white font-semibold py-3 px-4 hover:bg-[#022f21] transition-colors"
             >
               Back to credits

@@ -5,7 +5,6 @@
 export const LANDLORD_NAV_ITEMS = [
   { name: "Dashboard", route: "/dashboard/landlord" },
   { name: "Properties", route: "/dashboard/landlord/properties" },
-  { name: "Short stays", route: "/dashboard/landlord/short-stays" },
   { name: "Leads & Applications", route: "/dashboard/landlord/properties/renters" },
   { name: "Tenants", route: "/dashboard/landlord/tenants" },
   { name: "Tenant Verification", route: "/dashboard/landlord/properties/verification" },
