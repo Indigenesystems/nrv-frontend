@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { DOJAH_APP_ID, DOJAH_WIDGET_ID } from "@/lib/dojahWidget";
 
 type DojahWidgetConfig = {
   appId?: string;
@@ -74,10 +75,10 @@ export default function DojahLivenessWidget({
   listeners.onSuccess = onSuccess;
   listeners.onError = onError;
 
-  const appId = widget.appId;
+  const appId = widget.appId || DOJAH_APP_ID;
   const publicKey = widget.publicKey;
-  const widgetId = widget.widgetId;
-  const type = widget.widgetId ? "custom" : widget.type || "liveness";
+  const widgetId = widget.widgetId || DOJAH_WIDGET_ID;
+  const type = widgetId ? "custom" : widget.type || "liveness";
   const referenceId = widget.referenceId;
   const firstName = widget.firstName;
   const lastName = widget.lastName;
