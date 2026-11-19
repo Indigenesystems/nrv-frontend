@@ -76,6 +76,11 @@ const SignUpVerifyAccount: React.FC<SignUpVerifyAccountProps> = ({
     setIsLoading(true);
     try {
       const response = await dispatch(verifyAccount(payload) as any).unwrap();
+      console.info("[NRV NIN] confirm-account result", {
+        accountType: response?.user?.accountType,
+        managerNinVerified: response?.managerNinVerified,
+        managerNinVerifiedAt: response?.user?.managerNinVerifiedAt,
+      });
       localStorage.removeItem("stepToLoad");
       setIsLoading(false);
 
@@ -87,6 +92,9 @@ const SignUpVerifyAccount: React.FC<SignUpVerifyAccountProps> = ({
         } else if (accountType === "landlord") {
           router.push("/dashboard/landlord");
         } else if (accountType === "shortlet_manager") {
+          toast.success(
+            "Account confirmed. NRV admin will review your NIN before credits are added.",
+          );
           router.push("/dashboard/manager");
         } else {
           router.push("/");
@@ -101,7 +109,9 @@ const SignUpVerifyAccount: React.FC<SignUpVerifyAccountProps> = ({
         return;
       }
       if (accountType === "shortlet_manager") {
-        toast.success("Account verified. Welcome to NaijaRentVerify!");
+        toast.success(
+          "Account confirmed. NRV admin will review your NIN before credits are added.",
+        );
         router.push("/dashboard/manager");
         return;
       }

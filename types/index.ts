@@ -142,10 +142,11 @@ export interface SignUpFormData {
   email: string;
   phoneNumber: string;
   password: string;
-  accountType: 'landlord' | 'tenant';
+  accountType: 'landlord' | 'tenant' | 'shortlet_manager';
   nin?: string;
   homeAddress?: string;
   file?: File | null;
+  acceptedTerms?: boolean;
 }
 
 export interface PropertyFormData {

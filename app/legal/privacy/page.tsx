@@ -42,7 +42,7 @@ const LegalPrivacyPage = () => {
             <ul className="list-disc pl-5 space-y-1">
               <li>
                 <strong>Account Information:</strong> Full name, email address, phone number, role
-                (landlord/tenant), and password.
+                (landlord, tenant, or shortlet manager), and password.
               </li>
               <li>
                 <strong>Verification Data:</strong> National Identification Number (NIN), Bank Verification Number
@@ -56,6 +56,9 @@ const LegalPrivacyPage = () => {
               </li>
               <li>
                 <strong>Communications:</strong> Messages exchanged between landlords and tenants through the Platform.
+              </li>
+              <li>
+                <strong>Shortlet managers and guests:</strong> We collect a shortlet manager’s NIN for NRV staff to review. We collect a guest’s NIN and live selfie when the host sends an identity check. Hosts see a NaijaRentVerify result summary only. Listing a shortlet is not required to use this service.
               </li>
             </ul>
 

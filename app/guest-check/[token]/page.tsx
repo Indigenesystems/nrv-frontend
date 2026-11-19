@@ -3,14 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import DojahLivenessWidget from "@/app/components/guest-check/DojahLivenessWidget";
 import GuestSelfieCapture from "@/app/components/guest-check/GuestSelfieCapture";
 import {
   completeGuestInvite,
   consentGuestInvite,
   fetchGuestInvite,
 } from "@/lib/guestVerificationApi";
-import { DOJAH_APP_ID, DOJAH_PUBLIC_KEY } from "@/lib/dojahWidget";
 
 type Invite = {
   guestName?: string;
@@ -19,17 +17,6 @@ type Invite = {
   consented?: boolean;
   completed?: boolean;
   status?: string;
-  widget?: {
-    configured?: boolean;
-    appId?: string;
-    publicKey?: string;
-    widgetId?: string;
-    type?: string;
-    referenceId?: string;
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-  };
 };
 
 export default function GuestCheckPage() {
@@ -41,13 +28,6 @@ export default function GuestCheckPage() {
   const [nin, setNin] = useState("");
   const [selfie, setSelfie] = useState("");
   const [busy, setBusy] = useState(false);
-  const [livenessOpen, setLivenessOpen] = useState(false);
-
-  const widgetReady = Boolean(
-    invite?.widget?.configured ||
-      invite?.widget?.appId ||
-      (DOJAH_APP_ID && DOJAH_PUBLIC_KEY),
-  );
 
   useEffect(() => {
     if (!token) {
@@ -84,7 +64,7 @@ export default function GuestCheckPage() {
   };
 
   const finish = useCallback(
-    async (opts?: { usedWidget?: boolean; widgetReferenceId?: string }) => {
+    async () => {
       const digits = nin.replace(/\D/g, "");
       if (!/^\d{11}$/.test(digits)) {
         setError("NIN must be 11 digits.");
@@ -95,9 +75,7 @@ export default function GuestCheckPage() {
       try {
         await completeGuestInvite(token, {
           nin: digits,
-          usedWidget: opts?.usedWidget,
-          widgetReferenceId: opts?.widgetReferenceId,
-          selfieImageBase64: opts?.usedWidget ? undefined : selfie,
+          selfieImageBase64: selfie,
         });
         setStep(4);
       } catch (err: any) {
@@ -107,7 +85,6 @@ export default function GuestCheckPage() {
         );
       } finally {
         setBusy(false);
-        setLivenessOpen(false);
       }
     },
     [nin, selfie, token],
@@ -189,56 +166,18 @@ export default function GuestCheckPage() {
 
         {invite && step === 3 ? (
           <div className="mt-4 space-y-4">
-            {widgetReady ? (
-              <>
-                {!livenessOpen ? (
-                  <button
-                    type="button"
-                    disabled={busy}
-                    onClick={() => {
-                      setError("");
-                      setLivenessOpen(true);
-                    }}
-                    className="w-full rounded-full bg-[#03442C] py-3 text-sm font-semibold text-white disabled:opacity-60"
-                  >
-                    Start live camera check
-                  </button>
-                ) : (
-                  <DojahLivenessWidget
-                    widget={{ ...(invite.widget || {}), nin }}
-                    onSuccess={(payload) => {
-                      setError("");
-                      void finish({
-                        usedWidget: true,
-                        widgetReferenceId: payload?.referenceId,
-                      });
-                    }}
-                    onError={(message) => {
-                      setLivenessOpen(false);
-                      setError(message);
-                    }}
-                  />
-                )}
-                {busy ? (
-                  <p className="text-sm text-gray-500">Checking result…</p>
-                ) : null}
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-gray-600">
-                  Take a live selfie. Look at the camera in good light.
-                </p>
-                <GuestSelfieCapture value={selfie} onCapture={setSelfie} />
-                <button
-                  type="button"
-                  disabled={busy || !selfie}
-                  onClick={() => void submitStill()}
-                  className="w-full rounded-full bg-[#03442C] py-3 text-sm font-semibold text-white disabled:opacity-60"
-                >
-                  Submit identity check
-                </button>
-              </>
-            )}
+            <p className="text-sm text-gray-600">
+              Take a live selfie. Look at the camera in good light.
+            </p>
+            <GuestSelfieCapture value={selfie} onCapture={setSelfie} />
+            <button
+              type="button"
+              disabled={busy || !selfie}
+              onClick={() => void submitStill()}
+              className="w-full rounded-full bg-[#03442C] py-3 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              {busy ? "Checking result…" : "Submit identity check"}
+            </button>
           </div>
         ) : null}
 

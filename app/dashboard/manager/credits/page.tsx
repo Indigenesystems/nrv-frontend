@@ -89,7 +89,9 @@ export default function ManagerCreditsPage() {
           Shortlet identity credits
         </h1>
         <p className="text-gray-600">
-          Each credit runs one guest identity check (NIN and live selfie). Tenant
+          Each credit runs one guest identity check (NIN and live selfie). After
+          an NRV admin reviews your NIN, free credits are added — listing a
+          shortlet is not required. Buy more only if you need them. Tenant
           screening packs are not available on this account. Unused invites do
           not consume a credit.
         </p>
