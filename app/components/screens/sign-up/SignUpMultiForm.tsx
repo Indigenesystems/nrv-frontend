@@ -29,7 +29,14 @@ const validationSchema = yup.object({
     .string()
     .email("Invalid email address")
     .required("Email is required"),
-  nin: yup.string().optional(),
+  nin: yup.string().when("accountType", {
+    is: "shortlet_manager",
+    then: (schema) =>
+      schema
+        .required("NIN is required")
+        .matches(/^\d{11}$/, "NIN must be 11 digits"),
+    otherwise: (schema) => schema.optional(),
+  }),
   phoneNumber: yup.string().required("Phone Number is required"),
   accountType: yup.string().required("Account Type is required"),
   password: yup
@@ -309,9 +316,13 @@ const SignUpMultiForm = () => {
                         key={name}
                         placeholder="Start Typing..."
                         name={name}
-                        label={name
+                        label={
+                          name === "nin" && selectedRole === "shortlet_manager"
+                            ? "NIN (NRV admin will review this)"
+                            : name
                           .replace(/([A-Z])/g, " $1")
-                          .replace(/^./, (str) => str.toUpperCase())}
+                          .replace(/^./, (str) => str.toUpperCase())
+                        }
                         inputType={
                           name.includes("password")
                             ? "password"

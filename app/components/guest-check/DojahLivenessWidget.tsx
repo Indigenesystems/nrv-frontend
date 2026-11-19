@@ -164,7 +164,7 @@ export default function DojahLivenessWidget({
 
   return (
     <p className="text-sm text-gray-600">
-      Finish every step in the Dojah window, including the camera. Do not close
+      Finish every step in the NaijaRentVerify camera check. Do not close
       it until you see a confirmation.
     </p>
   );

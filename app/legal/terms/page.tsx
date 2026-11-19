@@ -72,7 +72,23 @@ const TermsPage = () => {
               <li>Properties must comply with all applicable Nigerian housing regulations and safety standards.</li>
             </ul>
 
-            <h3 className="text-lg font-semibold text-[#03442C] mt-4 mb-2">5.2 Tenants</h3>
+            <h3 className="text-lg font-semibold text-[#03442C] mt-4 mb-2">5.2 Shortlet managers</h3>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>
+                Shortlet managers must provide their National Identification Number (NIN) when they register. NRV staff review that NIN before the account is fully enabled for guest checks. Listing a shortlet on NRV is optional.
+              </li>
+              <li>
+                After admin approval, NRV may grant free guest-check credits. Additional credits may be purchased. Each completed guest check uses one credit.
+              </li>
+              <li>
+                Guest identity checks are presented as NaijaRentVerify. Hosts receive a result summary only — not the guest’s full NIN, selfie, or biometric images.
+              </li>
+              <li>
+                You remain responsible for stay payment, check-in, and whether you host a guest.
+              </li>
+            </ul>
+
+            <h3 className="text-lg font-semibold text-[#03442C] mt-4 mb-2">5.3 Tenants</h3>
             <ul className="list-disc pl-5 space-y-1">
               <li>You must provide truthful information during verification processes.</li>
               <li>You must not misrepresent your identity, rental history, or financial capacity.</li>

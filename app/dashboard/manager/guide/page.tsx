@@ -15,8 +15,12 @@ export default function ManagerGuidePage() {
               heading: "Send a check",
               steps: [
                 {
-                  title: "Buy shortlet identity credits",
-                  body: "Each completed guest check uses one shortlet credit. Tenant screening packs are not used here. Unused invites do not consume a credit.",
+                  title: "Submit your NIN",
+                  body: "After you register, NRV collects your NIN. An admin reviews it, then adds free guest-check credits. You do not need to list a shortlet first.",
+                },
+                {
+                  title: "Use credits, then buy more if you need them",
+                  body: "Each completed guest check uses one shortlet credit. Unused invites do not consume a credit. Tenant screening packs are not used here.",
                 },
                 {
                   title: "Create a request",

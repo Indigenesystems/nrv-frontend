@@ -6,6 +6,15 @@ import ManagerLayout from "@/app/components/layout/ManagerLayout";
 import { fetchGuestVerifications } from "@/lib/guestVerificationApi";
 import { getVerificationCreditBalances } from "@/helpers/verificationCredits";
 
+const readSessionUser = () => {
+  try {
+    const raw = localStorage.getItem("nrv-user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
 export default function ManagerDashboardPage() {
   const [counts, setCounts] = useState({
     pending: 0,
@@ -17,14 +26,14 @@ export default function ManagerDashboardPage() {
   });
   const [credits, setCredits] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [ninVerified, setNinVerified] = useState(true);
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem("nrv-user");
-      setCredits(
-        getVerificationCreditBalances(raw ? JSON.parse(raw)?.user : null)
-          .shortlet,
-      );
+      const session = readSessionUser();
+      const user = session?.user || null;
+      setCredits(getVerificationCreditBalances(user).shortlet);
+      setNinVerified(Boolean(user?.managerNinVerifiedAt));
     } catch {
       setCredits(0);
     }
@@ -61,9 +70,19 @@ export default function ManagerDashboardPage() {
             Guest verification
           </h1>
           <p className="mt-1 text-sm text-gray-600">
-            Confirm who is checking in. Stay payment stays off NRV.
+            Confirm who is checking in. You do not need to list a shortlet.
+            Stay payment stays off NRV.
           </p>
         </div>
+        {!ninVerified ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm text-[#101828]">
+              We have your NIN. An NRV admin will review it. Free guest-check
+              credits are added after they approve. Listing a property is not
+              required.
+            </p>
+          </div>
+        ) : null}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {cards.map((card) => (
             <div

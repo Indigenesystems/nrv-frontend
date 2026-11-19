@@ -63,6 +63,7 @@ interface AddCreditsRequest {
   userId: string;
   standardVerification?: number;
   premiumVerification?: number;
+  shortletVerification?: number;
 }
 
 interface TenancyRequest {
@@ -101,6 +102,7 @@ export const createUser = createAsyncThunk<UserToken, SignUpFormData>(
       body.append("phoneNumber", formData.phoneNumber);
       body.append("password", formData.password);
       body.append("accountType", formData.accountType);
+      body.append("acceptedTerms", "true");
       if (formData.nin) {
         body.append("nin", formData.nin);
       }
@@ -206,7 +208,7 @@ export const purchasePack = createAsyncThunk<UserToken, UpdatePlanRequest>(
 export const addCredits = createAsyncThunk<UserToken, AddCreditsRequest>(
   "user/addCredits",
   async (
-    { userId, standardVerification, premiumVerification }: AddCreditsRequest,
+    { userId, standardVerification, premiumVerification, shortletVerification }: AddCreditsRequest,
     { getState, rejectWithValue },
   ) => {
     try {
@@ -214,7 +216,7 @@ export const addCredits = createAsyncThunk<UserToken, AddCreditsRequest>(
       const token = stored ? (JSON.parse(stored)?.accessToken) : undefined;
       const response = await axios.post<{ data: any; status: string; message: string }>(
         `${API_URL}/users/${userId}/add-credits`,
-        { standardVerification, premiumVerification },
+        { standardVerification, premiumVerification, shortletVerification },
         {
           headers: {
             "Content-Type": "application/json",
@@ -251,6 +253,8 @@ export const verifyAccount = createAsyncThunk<UserToken, VerifyData>(
         user: payload?.user ?? response.data?.user,
         accessToken: payload?.accessToken ?? response.data?.accessToken,
         notificationSettings: payload?.notificationSettings ?? response.data?.notificationSettings,
+        managerNinVerified: payload?.managerNinVerified ?? response.data?.managerNinVerified,
+        managerNinMessage: payload?.managerNinMessage ?? response.data?.managerNinMessage,
       };
       localStorage.setItem("nrv-user", JSON.stringify(userData));
       localStorage.removeItem("emailToVerify");
