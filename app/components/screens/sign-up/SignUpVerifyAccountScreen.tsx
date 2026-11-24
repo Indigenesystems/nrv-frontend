@@ -92,10 +92,8 @@ const SignUpVerifyAccount: React.FC<SignUpVerifyAccountProps> = ({
         } else if (accountType === "landlord") {
           router.push("/dashboard/landlord");
         } else if (accountType === "shortlet_manager") {
-          toast.success(
-            "Account confirmed. NRV admin will review your NIN before credits are added.",
-          );
-          router.push("/dashboard/manager");
+          toast.success("Account confirmed. Complete your business profile next.");
+          router.push("/onboard/manager");
         } else {
           router.push("/");
         }
@@ -109,10 +107,8 @@ const SignUpVerifyAccount: React.FC<SignUpVerifyAccountProps> = ({
         return;
       }
       if (accountType === "shortlet_manager") {
-        toast.success(
-          "Account confirmed. NRV admin will review your NIN before credits are added.",
-        );
-        router.push("/dashboard/manager");
+        toast.success("Account confirmed. Complete your business profile next.");
+        router.push("/onboard/manager");
         return;
       }
 
@@ -166,32 +162,21 @@ const SignUpVerifyAccount: React.FC<SignUpVerifyAccountProps> = ({
                   className="mb-4"
                 />
                 <h2 className="text-2xl font-semibold text-gray-900">
-                  Verify Your Email Address
+                  Verify Your Account
                 </h2>
                 <p className="mt-2 text-gray-600">
-                  We&apos;ve sent a 6-digit verification code to{" "}
-                  <strong className="text-gray-900">{emailDisplay}</strong> and
-                  by SMS to the phone number you used to sign up.
+                  We&apos;ve sent a 6-digit verification code to your registered
+                  email address
+                  {emailDisplay ? (
+                    <>
+                      {" "}
+                      (<strong className="text-gray-900">{emailDisplay}</strong>)
+                    </>
+                  ) : null}{" "}
+                  and phone number. Enter the code below to activate your
+                  account. If you don&apos;t receive it, check your spam folder
+                  or request a new code.
                 </p>
-                <p className="mt-1 text-gray-600">
-                  Enter the code below to activate your account.
-                </p>
-
-                <div className="mt-4 text-left text-gray-700">
-                  <p className="font-semibold">Instructions:</p>
-                  <ul className="list-disc list-inside text-sm">
-                    <li className="mt-4">Open your email inbox (and spam folder).</li>
-                    <li className="mt-4">
-                      Check the SMS sent to your phone number.
-                    </li>
-                    <li className="mt-4">
-                      Look for an email from NaijaRentVerify.
-                    </li>
-                    <li className="mt-4">
-                      Copy the One-time PIN (OTP) and paste it here.
-                    </li>
-                  </ul>
-                </div>
 
                 <div className="mt-8 flex justify-center">
                   <OtpInput

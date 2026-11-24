@@ -201,7 +201,10 @@ export const isPathAllowedForRole = (
     );
   }
   if (role === "shortlet_manager") {
-    return pathname.startsWith("/dashboard/manager");
+    return (
+      pathname.startsWith("/dashboard/manager") ||
+      pathname.startsWith("/onboard/manager")
+    );
   }
   return (
     pathname.startsWith("/dashboard/landlord") ||

@@ -45,7 +45,9 @@ export function middleware(request: NextRequest) {
   const isTenantPath =
     pathname.startsWith("/dashboard/tenant") ||
     pathname.startsWith("/onboard/tenant");
-  const isManagerPath = pathname.startsWith("/dashboard/manager");
+  const isManagerPath =
+    pathname.startsWith("/dashboard/manager") ||
+    pathname.startsWith("/onboard/manager");
 
   // Enforce role cookie when present (set on login / session restore).
   if (role === "tenant" && (isLandlordPath || isManagerPath)) {

@@ -13,6 +13,10 @@ import {
   resendGuestVerification,
   type GuestVerificationRequest,
 } from "@/lib/guestVerificationApi";
+import { getVerificationCreditBalances } from "@/helpers/verificationCredits";
+
+const CREDIT_REQUIRED_MESSAGE =
+  "You don't have enough verification credits to create this request. Please purchase credits to continue.";
 
 const STATUS_LABEL: Record<string, string> = {
   pending_invite: "Pending",
@@ -30,9 +34,17 @@ export default function GuestVerificationsPage() {
   const [guestEmail, setGuestEmail] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
   const [checkInDate, setCheckInDate] = useState("");
-  const [inviteUrl, setInviteUrl] = useState("");
   const [saving, setSaving] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
+  const remainingCredits = () => {
+    try {
+      const raw = localStorage.getItem("nrv-user");
+      const user = raw ? JSON.parse(raw)?.user : null;
+      return getVerificationCreditBalances(user).shortlet;
+    } catch {
+      return 0;
+    }
+  };
 
   const load = async () => {
     try {
@@ -53,7 +65,6 @@ export default function GuestVerificationsPage() {
   }, []);
 
   const openForm = () => {
-    setInviteUrl("");
     setFormOpen(true);
   };
 
@@ -74,15 +85,19 @@ export default function GuestVerificationsPage() {
   const createRequest = async (sendEmail: boolean) => {
     if (!guestName.trim()) {
       toast.error("Enter the guest full name.");
-      return;
+      return null;
     }
     if (!guestEmail.trim() && !guestPhone.trim()) {
       toast.error("Enter an email or phone number.");
-      return;
+      return null;
     }
     if (!checkInDate) {
       toast.error("Enter the expected check-in date.");
-      return;
+      return null;
+    }
+    if (remainingCredits() < 1) {
+      toast.error(CREDIT_REQUIRED_MESSAGE);
+      return null;
     }
     setSaving(true);
     try {
@@ -93,19 +108,20 @@ export default function GuestVerificationsPage() {
         checkInDate,
         sendEmail,
       });
-      const url = res?.data?.inviteUrl || "";
-      setInviteUrl(url);
       resetForm();
-      toast.success(
-        sendEmail && guestEmail.trim()
-          ? "Invite sent by email."
-          : "Invite link ready to copy.",
-      );
+      setFormOpen(false);
+      if (sendEmail && guestEmail.trim()) {
+        toast.success(
+          "Verification invitation sent successfully to the guest's email address.",
+        );
+      }
       await load();
+      return res?.data?.inviteUrl || "";
     } catch (err: any) {
       toast.error(
         err?.response?.data?.message || "Could not create this request.",
       );
+      return null;
     } finally {
       setSaving(false);
     }
@@ -126,44 +142,9 @@ export default function GuestVerificationsPage() {
   };
 
   const copyLink = async () => {
-    if (inviteUrl && !guestName.trim()) {
-      await copyText(inviteUrl);
-      return;
-    }
-    if (
-      !guestName.trim() ||
-      !checkInDate ||
-      (!guestEmail.trim() && !guestPhone.trim())
-    ) {
-      if (inviteUrl) {
-        await copyText(inviteUrl);
-        return;
-      }
-      toast.error("Fill in the guest details first.");
-      return;
-    }
-    setSaving(true);
-    try {
-      const res = await createGuestVerification({
-        guestName: guestName.trim(),
-        guestEmail: guestEmail.trim() || undefined,
-        guestPhone: guestPhone.trim() || undefined,
-        checkInDate,
-        sendEmail: false,
-      });
-      const url = res?.data?.inviteUrl || "";
-      setInviteUrl(url);
-      resetForm();
-      if (url) {
-        await copyText(url);
-      }
-      await load();
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || "Could not create this request.",
-      );
-    } finally {
-      setSaving(false);
+    const url = await createRequest(false);
+    if (url) {
+      await copyText(url);
     }
   };
 
@@ -190,8 +171,8 @@ export default function GuestVerificationsPage() {
               Guest verifications
             </h1>
             <p className="mt-1 text-sm text-gray-600">
-              Send a link so the guest can confirm identity. Stay payment stays
-              off NRV.
+              Enter your guest&apos;s details to send a secure identity
+              verification request. Your guest does not require an NRV account.
             </p>
           </div>
           <button
@@ -199,7 +180,7 @@ export default function GuestVerificationsPage() {
             onClick={openForm}
             className="shrink-0 rounded-full bg-[#03442C] px-4 py-2 text-sm font-semibold text-white"
           >
-            New verification
+            New Guest Verification
           </button>
         </div>
 
@@ -214,7 +195,7 @@ export default function GuestVerificationsPage() {
                 onClick={openForm}
                 className="font-medium text-[#03442C]"
               >
-                Start a new verification
+                New Guest Verification
               </button>
             </p>
           ) : (
@@ -271,7 +252,7 @@ export default function GuestVerificationsPage() {
                             onClick={() => void copyAgain(item._id)}
                             className="text-[#03442C] font-medium"
                           >
-                            Copy link
+                            Copy Verification Link
                           </button>
                         ) : (
                           <Link
@@ -295,10 +276,12 @@ export default function GuestVerificationsPage() {
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold text-[#101828]">
-                New verification
+                New Guest Verification
               </h2>
               <p className="mt-1 text-sm text-gray-600">
-                The guest does not need an NRV account.
+                Enter your guest&apos;s details to send a secure identity
+                verification request. Your guest does not require an NRV
+                account.
               </p>
             </div>
             <button
@@ -356,7 +339,7 @@ export default function GuestVerificationsPage() {
                 disabled={saving}
                 className="rounded-full bg-[#03442C] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
               >
-                Email link
+                Send Verification Link
               </button>
               <button
                 type="button"
@@ -364,13 +347,10 @@ export default function GuestVerificationsPage() {
                 onClick={() => void copyLink()}
                 className="rounded-full border border-[#03442C]/30 px-5 py-2.5 text-sm font-semibold text-[#03442C] disabled:opacity-60"
               >
-                Copy link for WhatsApp
+                Generate & Copy Link
               </button>
             </div>
           </form>
-          {inviteUrl ? (
-            <p className="mt-4 break-all text-xs text-gray-500">{inviteUrl}</p>
-          ) : null}
         </div>
       </CenterModal>
     </ManagerLayout>
