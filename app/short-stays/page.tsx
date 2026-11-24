@@ -2,9 +2,12 @@ import Link from "next/link";
 import HomePageLayout from "@/app/components/layout/HomePageLayout";
 import { pageMetadata } from "@/lib/seo";
 
+const HERO_DESCRIPTION =
+  "Verify your guests' identities before arrival with NRV Shortlet Verify. Send secure verification requests, track their progress, and receive identity verification results—all from one convenient dashboard.";
+
 export const metadata = pageMetadata(
-  "Know your guest before check-in",
-  "Shortlet managers use NaijaRentVerify to confirm guest identity. Stay payment stays off the platform.",
+  "Know Your Guest Before Check-In",
+  HERO_DESCRIPTION,
   "/short-stays",
 );
 
@@ -14,13 +17,9 @@ export default function ShortStayMarketingPage() {
       <section className="max-w-3xl mx-auto px-4 py-16">
         <p className="text-sm font-semibold text-[#03442C]">NRV Shortlet Verify</p>
         <h1 className="mt-2 text-3xl sm:text-4xl font-bold text-[#101828]">
-          Know your guest before check-in
+          Know Your Guest Before Check-In
         </h1>
-        <p className="mt-4 text-gray-600 leading-relaxed">
-          Bookings still happen on WhatsApp, Airbnb, or Instagram. NRV gives
-          you an identity result and an auditable record. You collect payment
-          and handle check-in yourself.
-        </p>
+        <p className="mt-4 text-gray-600 leading-relaxed">{HERO_DESCRIPTION}</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
             href="/sign-up?role=shortlet_manager"

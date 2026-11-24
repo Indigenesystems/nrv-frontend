@@ -14,6 +14,7 @@ export interface UserData {
     accountType: string;
     status: string;
     email?: string;
+    nin?: string;
     mustChangePassword?: boolean;
   };
   // Current API shape uses `accessToken`; keep `token` optional for legacy usage.
@@ -25,4 +26,4 @@ export interface UserData {
 export interface SocialLoginProvider {
   google: 'google';
   facebook: 'facebook';
-} 
+}

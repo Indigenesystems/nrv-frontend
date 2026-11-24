@@ -95,7 +95,11 @@ export const useAuthRedirect = () => {
           router.push(ROUTES.TENANT_DASHBOARD);
           break;
         case "shortlet_manager":
-          router.push(ROUTES.MANAGER_DASHBOARD);
+          router.push(
+            userData?.user?.nin
+              ? ROUTES.MANAGER_DASHBOARD
+              : ROUTES.MANAGER_ONBOARD,
+          );
           break;
         default:
           router.push(ROUTES.HOME);

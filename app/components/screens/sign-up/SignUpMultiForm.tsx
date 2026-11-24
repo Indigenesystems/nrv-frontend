@@ -29,14 +29,7 @@ const validationSchema = yup.object({
     .string()
     .email("Invalid email address")
     .required("Email is required"),
-  nin: yup.string().when("accountType", {
-    is: "shortlet_manager",
-    then: (schema) =>
-      schema
-        .required("NIN is required")
-        .matches(/^\d{11}$/, "NIN must be 11 digits"),
-    otherwise: (schema) => schema.optional(),
-  }),
+  nin: yup.string().optional(),
   phoneNumber: yup.string().required("Phone Number is required"),
   accountType: yup.string().required("Account Type is required"),
   password: yup
@@ -73,7 +66,10 @@ const SignUpMultiForm = () => {
       return;
     }
     const { confirmPassword, ...payload } = values;
-    if (payload.accountType === "tenant") {
+    if (
+      payload.accountType === "tenant" ||
+      payload.accountType === "shortlet_manager"
+    ) {
       delete payload.nin;
     }
     setIsLoading(true);
@@ -301,10 +297,7 @@ const SignUpMultiForm = () => {
                     "lastName",
                     "email",
                     "phoneNumber",
-                    ...(selectedRole === "landlord" ||
-                    selectedRole === "shortlet_manager"
-                      ? (["nin"] as const)
-                      : []),
+                    ...(selectedRole === "landlord" ? (["nin"] as const) : []),
                     "password",
                     "confirmPassword",
                   ] as const;
@@ -314,12 +307,18 @@ const SignUpMultiForm = () => {
                     {formFields.map((name) => (
                       <InputField
                         key={name}
-                        placeholder="Start Typing..."
+                        placeholder={
+                          {
+                            firstName: "Enter your first name",
+                            lastName: "Enter your last name",
+                            email: "Enter your email address",
+                            password: "Create a password",
+                            confirmPassword: "Confirm your password",
+                            nin: "Enter your 11-digit NIN",
+                          }[name]
+                        }
                         name={name}
-                        label={
-                          name === "nin" && selectedRole === "shortlet_manager"
-                            ? "NIN (NRV admin will review this)"
-                            : name
+                        label={name
                           .replace(/([A-Z])/g, " $1")
                           .replace(/^./, (str) => str.toUpperCase())
                         }

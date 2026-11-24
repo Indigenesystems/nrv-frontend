@@ -7,6 +7,7 @@ export const ROUTES = {
   LANDLORD_DASHBOARD: "/dashboard/landlord",
   TENANT_DASHBOARD: "/dashboard/tenant",
   MANAGER_DASHBOARD: "/dashboard/manager",
+  MANAGER_ONBOARD: "/onboard/manager",
 } as const;
 
 export const VALIDATION_MESSAGES = {

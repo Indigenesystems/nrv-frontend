@@ -27,6 +27,7 @@ export default function ManagerDashboardPage() {
   const [credits, setCredits] = useState(0);
   const [loading, setLoading] = useState(true);
   const [ninVerified, setNinVerified] = useState(true);
+  const [hasSubmittedNin, setHasSubmittedNin] = useState(true);
 
   useEffect(() => {
     try {
@@ -34,6 +35,7 @@ export default function ManagerDashboardPage() {
       const user = session?.user || null;
       setCredits(getVerificationCreditBalances(user).shortlet);
       setNinVerified(Boolean(user?.managerNinVerifiedAt));
+      setHasSubmittedNin(Boolean(user?.nin || user?.ninLast4));
     } catch {
       setCredits(0);
     }
@@ -70,16 +72,28 @@ export default function ManagerDashboardPage() {
             Guest verification
           </h1>
           <p className="mt-1 text-sm text-gray-600">
-            Confirm who is checking in. You do not need to list a shortlet.
-            Stay payment stays off NRV.
+            Manage guest identity verifications, track requests, and review
+            verification results—all in one place.
           </p>
         </div>
-        {!ninVerified ? (
+        {!hasSubmittedNin ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
             <p className="text-sm text-[#101828]">
-              We have your NIN. An NRV admin will review it. Free guest-check
-              credits are added after they approve. Listing a property is not
-              required.
+              Complete your business profile to continue.{" "}
+              <Link
+                href="/onboard/manager"
+                className="font-semibold text-[#03442C] underline"
+              >
+                Add business details
+              </Link>
+            </p>
+          </div>
+        ) : !ninVerified ? (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <p className="text-sm text-[#101828]">
+              Your account verification is pending. Once approved, your
+              complimentary guest verification credit will be added to your
+              account.
             </p>
           </div>
         ) : null}
@@ -103,23 +117,49 @@ export default function ManagerDashboardPage() {
             <p className="text-xs uppercase tracking-wide text-gray-500">
               Identity credits
             </p>
-            <p className="text-lg font-semibold tabular-nums">{credits} remaining</p>
+            <p className="text-lg font-semibold tabular-nums">
+              Available credits: {credits}
+            </p>
+            {hasSubmittedNin && !ninVerified ? (
+              <p className="text-sm text-gray-600">
+                Complimentary credits: Pending
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600">{credits} remaining</p>
+            )}
           </div>
           <div className="flex gap-2">
             <Link
               href="/dashboard/manager/credits"
               className="rounded-full border border-[#03442C]/30 px-4 py-2 text-sm font-semibold text-[#03442C]"
             >
-              Buy credits
+              Purchase Verification Credits
             </Link>
             <Link
               href="/dashboard/manager/requests#new-check"
               className="rounded-full bg-[#03442C] px-4 py-2 text-sm font-semibold text-white"
             >
-              New verification
+              New Guest Verification
             </Link>
           </div>
         </div>
+        {!loading && counts.total === 0 ? (
+          <div className="rounded-xl border border-gray-100 bg-white p-8 text-center">
+            <h2 className="text-lg font-semibold text-[#101828]">
+              No Guest Verifications Yet
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">
+              Start by sending your first identity verification request. You can
+              track its progress and view the result here.
+            </p>
+            <Link
+              href="/dashboard/manager/requests#new-check"
+              className="mt-4 inline-flex rounded-full bg-[#03442C] px-5 py-2.5 text-sm font-semibold text-white"
+            >
+              New Guest Verification
+            </Link>
+          </div>
+        ) : null}
       </div>
     </ManagerLayout>
   );

@@ -83,7 +83,7 @@ export default function ManagerCreditsPage() {
   };
 
   return (
-    <ManagerLayout mainPath="Buy shortlet credits">
+    <ManagerLayout mainPath="Purchase Verification Credits">
       <div className="mx-auto max-w-3xl px-4 py-5 sm:p-6">
         <h1 className="mb-1 text-2xl font-semibold text-gray-900">
           Shortlet identity credits

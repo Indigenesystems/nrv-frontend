@@ -28,7 +28,7 @@ interface User {
 const ICONS: Record<string, React.ReactNode> = {
   Dashboard: <FiHome />,
   "Guest verifications": <FiClipboard />,
-  "Buy shortlet credits": <FiDollarSign />,
+  "Purchase Verification Credits": <FiDollarSign />,
   Settings: <FiSettings />,
   "How it works": <FiHelpCircle />,
 };
